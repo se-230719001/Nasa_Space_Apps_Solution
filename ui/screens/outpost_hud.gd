@@ -47,6 +47,7 @@ const STATUS_COLORS := [Color("#3CDB56"), Color("#F7C948"), Color("#FF4961")]
 const KEYS := ["health", "food", "water", "energy", "oxygen"]
 const NAMES := {"health": "Colony Health", "food": "Food", "water": "Water", "energy": "Energy", "oxygen": "Oxygen"}
 const RING_SIZE := 58
+const COMPACT_RING_SIZE := 48
 const COLLAPSE_DELAY := 0.35
 ## Doc A tables as kid-friendly "goes up / goes down / strategy" for each icon.
 const INFO := {
@@ -79,6 +80,13 @@ var _pending_cell := Vector2i(-1, -1)
 var _icons := {}
 var _ring_tex: Texture2D
 var _outside_time := 0.0
+var _compact_layout := false
+var _narrow_layout := false
+var _layout_initialized := false
+
+
+static func uses_compact_layout(viewport_width: float) -> bool:
+	return viewport_width < 960.0
 
 
 func _ready() -> void:
@@ -104,6 +112,8 @@ func _ready() -> void:
 	_set_expanded(false)
 	_apply_safe_area()
 	get_viewport().size_changed.connect(_apply_safe_area)
+	get_viewport().size_changed.connect(_apply_responsive_layout)
+	_apply_responsive_layout()
 	_play_splash()
 
 
@@ -746,6 +756,54 @@ func _label(text: String, variation: StringName, size := 0) -> Label:
 
 
 ## --- Platform ---------------------------------------------------------------------------------
+
+func _apply_responsive_layout() -> void:
+	_apply_responsive_layout_for_width(get_viewport_rect().size.x)
+
+
+func _apply_responsive_layout_for_width(viewport_width: float) -> void:
+	var compact := uses_compact_layout(viewport_width)
+	var narrow := viewport_width <= 360.0
+	if compact == _compact_layout and narrow == _narrow_layout and _layout_initialized:
+		return
+	_compact_layout = compact
+	_narrow_layout = narrow
+	_layout_initialized = true
+	var top_center: Control = $TopCenter
+	var top_right: Control = $TopRight
+	var goal_panel: Control = $GoalPanel
+	var mascot_area: Control = $MascotArea
+	var bottom_bar: Control = $BottomBar
+	var popup_dock: Control = $PopupDock
+	top_center.anchor_left = 0.0 if compact else 0.5
+	top_center.anchor_right = 1.0 if compact else 0.5
+	top_center.offset_left = 16.0 if compact else -260.0
+	top_center.offset_right = -16.0 if compact else 260.0
+	(%ResourceIcons as BoxContainer).add_theme_constant_override(&"separation", 0 if narrow else 10)
+	for key in _icons:
+		_icons[key].button.custom_minimum_size = Vector2(COMPACT_RING_SIZE if narrow else RING_SIZE, COMPACT_RING_SIZE if narrow else RING_SIZE)
+	top_right.visible = true
+	%CrewLabel.visible = not compact
+	%MaterialsLabel.visible = not compact
+	%ScienceLabel.visible = not compact
+	goal_panel.offset_left = 16.0 if compact else 24.0
+	goal_panel.offset_top = 96.0 if compact else 12.0
+	goal_panel.offset_right = 272.0 if compact else 304.0
+	goal_panel.offset_bottom = 246.0 if compact else 240.0
+	mascot_area.visible = not compact
+	bottom_bar.anchor_left = 0.0 if compact else 0.5
+	bottom_bar.anchor_right = 1.0 if compact else 0.5
+	bottom_bar.offset_left = 16.0 if compact else -330.0
+	bottom_bar.offset_right = -16.0 if compact else 330.0
+	bottom_bar.offset_top = -150.0 if compact else -78.0
+	bottom_bar.offset_bottom = -16.0 if compact else -20.0
+	popup_dock.anchor_left = 0.5 if compact else 1.0
+	popup_dock.anchor_right = 0.5 if compact else 1.0
+	popup_dock.offset_left = -180.0 if compact else -364.0
+	popup_dock.offset_right = 180.0 if compact else -24.0
+	popup_dock.offset_top = -180.0 if compact else -220.0
+	popup_dock.offset_bottom = 180.0 if compact else 220.0
+
 
 ## Keeps the HUD clear of rounded corners and the home indicator on iPad/iPhone.
 func _apply_safe_area() -> void:
