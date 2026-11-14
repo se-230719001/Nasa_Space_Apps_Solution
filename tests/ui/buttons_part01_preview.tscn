@@ -1,0 +1,347 @@
+[gd_scene format=3 uid="uid://buttons_part01_preview"]
+
+; ─────────────────────────────────────────────────────────────────────────────
+; MoonMinds – Buttons Part 01 Preview Scene
+; Purpose : Isolated visual test for the 8 incoming button states.
+;           DO NOT ship this scene in production.
+;           Approve here first, then follow the integration plan.
+; Viewport: 1280x720 landscape (matches project.godot)
+; ─────────────────────────────────────────────────────────────────────────────
+
+[ext_resource type="Texture2D" path="res://design/incoming/MOONMINDS_BUTTONS_PART_01/buttons/build_default.png"     id="bd"]
+[ext_resource type="Texture2D" path="res://design/incoming/MOONMINDS_BUTTONS_PART_01/buttons/build_pressed.png"     id="bp"]
+[ext_resource type="Texture2D" path="res://design/incoming/MOONMINDS_BUTTONS_PART_01/buttons/build_focus.png"       id="bf"]
+[ext_resource type="Texture2D" path="res://design/incoming/MOONMINDS_BUTTONS_PART_01/buttons/build_disabled.png"    id="bdi"]
+[ext_resource type="Texture2D" path="res://design/incoming/MOONMINDS_BUTTONS_PART_01/buttons/research_default.png"  id="rd"]
+[ext_resource type="Texture2D" path="res://design/incoming/MOONMINDS_BUTTONS_PART_01/buttons/research_pressed.png"  id="rp"]
+[ext_resource type="Texture2D" path="res://design/incoming/MOONMINDS_BUTTONS_PART_01/buttons/research_focus.png"    id="rf"]
+[ext_resource type="Texture2D" path="res://design/incoming/MOONMINDS_BUTTONS_PART_01/buttons/research_disabled.png" id="rdi"]
+
+; ─── Root ────────────────────────────────────────────────────────────────────
+[node name="ButtonsPart01Preview" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+; Dark navy background – MoonMinds #080F2B
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.031, 0.059, 0.169, 1)
+
+; ─── Title ───────────────────────────────────────────────────────────────────
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 18.0
+offset_right = 1240.0
+offset_bottom = 50.0
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+text = "MoonMinds – Buttons Part 01 Preview  |  1280×720  |  Logical cell size: 188×88 px (376×176 @2×)"
+horizontal_alignment = 1
+
+; ─── Section headers ─────────────────────────────────────────────────────────
+[node name="LabelBuild" type="Label" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 64.0
+offset_right = 300.0
+offset_bottom = 90.0
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.31, 0.42, 1.0, 1)
+text = "BUILD"
+
+[node name="LabelResearch" type="Label" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 360.0
+offset_right = 300.0
+offset_bottom = 388.0
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.31, 0.42, 1.0, 1)
+text = "RESEARCH"
+
+; ─── BUILD ROW (y: 95 – 183, cell 188×88) ────────────────────────────────────
+
+[node name="BuildDefaultContainer" type="Control" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 95.0
+offset_right = 228.0
+offset_bottom = 183.0
+
+[node name="StateLabel" type="Label" parent="BuildDefaultContainer"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = -18.0
+offset_right = 188.0
+offset_bottom = 0.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 0.7)
+text = "Default"
+
+[node name="Img" type="TextureRect" parent="BuildDefaultContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("bd")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="BuildPressedContainer" type="Control" parent="."]
+layout_mode = 1
+offset_left = 258.0
+offset_top = 95.0
+offset_right = 446.0
+offset_bottom = 183.0
+
+[node name="StateLabel" type="Label" parent="BuildPressedContainer"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = -18.0
+offset_right = 188.0
+offset_bottom = 0.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 0.7)
+text = "Pressed"
+
+[node name="Img" type="TextureRect" parent="BuildPressedContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("bp")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="BuildFocusContainer" type="Control" parent="."]
+layout_mode = 1
+offset_left = 476.0
+offset_top = 95.0
+offset_right = 664.0
+offset_bottom = 183.0
+
+[node name="StateLabel" type="Label" parent="BuildFocusContainer"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = -18.0
+offset_right = 188.0
+offset_bottom = 0.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 0.7)
+text = "Focus"
+
+[node name="Img" type="TextureRect" parent="BuildFocusContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("bf")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="BuildDisabledContainer" type="Control" parent="."]
+layout_mode = 1
+offset_left = 694.0
+offset_top = 95.0
+offset_right = 882.0
+offset_bottom = 183.0
+
+[node name="StateLabel" type="Label" parent="BuildDisabledContainer"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = -18.0
+offset_right = 188.0
+offset_bottom = 0.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 0.7)
+text = "Disabled"
+
+[node name="Img" type="TextureRect" parent="BuildDisabledContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("bdi")
+expand_mode = 3
+stretch_mode = 5
+
+; ─── Alignment note (BUILD row) ──────────────────────────────────────────────
+[node name="BuildAlignNote" type="Label" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 196.0
+offset_right = 1060.0
+offset_bottom = 215.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(1.0, 0.69, 0.13, 0.85)
+text = "⚠  Focus glow extends 8px further top/bottom than other states (body center offset -3 px X, -4 px Y). Use expand_mode=3 to avoid clipping in Godot."
+
+; ─── Divider ─────────────────────────────────────────────────────────────────
+[node name="Divider" type="ColorRect" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 340.0
+offset_right = 1240.0
+offset_bottom = 342.0
+color = Color(0.25, 0.29, 0.67, 0.35)
+
+; ─── RESEARCH ROW (y: 390 – 478, cell 188×88) ────────────────────────────────
+
+[node name="ResearchDefaultContainer" type="Control" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 390.0
+offset_right = 228.0
+offset_bottom = 478.0
+
+[node name="StateLabel" type="Label" parent="ResearchDefaultContainer"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = -18.0
+offset_right = 188.0
+offset_bottom = 0.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 0.7)
+text = "Default"
+
+[node name="Img" type="TextureRect" parent="ResearchDefaultContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("rd")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="ResearchPressedContainer" type="Control" parent="."]
+layout_mode = 1
+offset_left = 258.0
+offset_top = 390.0
+offset_right = 446.0
+offset_bottom = 478.0
+
+[node name="StateLabel" type="Label" parent="ResearchPressedContainer"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = -18.0
+offset_right = 188.0
+offset_bottom = 0.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 0.7)
+text = "Pressed"
+
+[node name="Img" type="TextureRect" parent="ResearchPressedContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("rp")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="ResearchFocusContainer" type="Control" parent="."]
+layout_mode = 1
+offset_left = 476.0
+offset_top = 390.0
+offset_right = 664.0
+offset_bottom = 478.0
+
+[node name="StateLabel" type="Label" parent="ResearchFocusContainer"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = -18.0
+offset_right = 188.0
+offset_bottom = 0.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 0.7)
+text = "Focus"
+
+[node name="Img" type="TextureRect" parent="ResearchFocusContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("rf")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="ResearchDisabledContainer" type="Control" parent="."]
+layout_mode = 1
+offset_left = 694.0
+offset_top = 390.0
+offset_right = 882.0
+offset_bottom = 478.0
+
+[node name="StateLabel" type="Label" parent="ResearchDisabledContainer"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = -18.0
+offset_right = 188.0
+offset_bottom = 0.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 0.7)
+text = "Disabled"
+
+[node name="Img" type="TextureRect" parent="ResearchDisabledContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("rdi")
+expand_mode = 3
+stretch_mode = 5
+
+; ─── Research alignment note ─────────────────────────────────────────────────
+[node name="ResearchAlignNote" type="Label" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 492.0
+offset_right = 1060.0
+offset_bottom = 511.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(1.0, 0.69, 0.13, 0.85)
+text = "⚠  Research focus: body center offset +3.5 px X, -4 px Y vs canvas center. Opposite horizontal drift from BUILD focus — request artwork correction for symmetry."
+
+; ─── Size reference ───────────────────────────────────────────────────────────
+[node name="SizeRef" type="Label" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 530.0
+offset_right = 1060.0
+offset_bottom = 550.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.5, 0.8, 0.5, 0.8)
+text = "✓  All 8 PNGs: 376×176 px RGBA, zero edge bleed, transparent corners, 48+ px touch height (54–58 logical) — minimum target size met."
+
+; ─── Production buttons size comparison ──────────────────────────────────────
+[node name="SizeCompare" type="Label" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 556.0
+offset_right = 1060.0
+offset_bottom = 576.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 0.7)
+text = "Current production build.png: 164×56 px (1×) | New: 376×176 @2× → 188×88 logical. HUD node custom_minimum_size must be updated: 188×88 (was 158×58)."
+
+; ─── Footer ──────────────────────────────────────────────────────────────────
+[node name="Footer" type="Label" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 700.0
+offset_right = 1240.0
+offset_bottom = 718.0
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.4, 0.4, 0.4, 0.6)
+text = "TEST SCENE – do not set as main scene  |  Approve visuals, then follow VALIDATION_REPORT.md production integration plan."
+horizontal_alignment = 1
