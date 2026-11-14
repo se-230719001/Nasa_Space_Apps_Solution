@@ -1,0 +1,512 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://ui/theme/moonminds_sprite_theme.tres" id="theme"]
+[ext_resource type="Script" path="res://ui/screens/outpost_hud.gd" id="script"]
+[ext_resource type="Script" path="res://ui/components/sprite_button.gd" id="sprite_button"]
+[ext_resource type="PackedScene" path="res://ui/components/resource_bar.tscn" id="bar"]
+[ext_resource type="Texture2D" path="res://assets/sprites/icons/power.png" id="i_power"]
+[ext_resource type="Texture2D" path="res://assets/sprites/icons/water.png" id="i_water"]
+[ext_resource type="Texture2D" path="res://assets/sprites/icons/food.png" id="i_food"]
+[ext_resource type="Texture2D" path="res://assets/sprites/icons/shield.png" id="i_shield"]
+[ext_resource type="Texture2D" path="res://assets/sprites/icons/calendar.png" id="i_calendar"]
+[ext_resource type="Texture2D" path="res://assets/sprites/icons/settings.png" id="i_settings"]
+[ext_resource type="Texture2D" path="res://assets/sprites/icons/box.png" id="i_box"]
+[ext_resource type="Texture2D" path="res://assets/sprites/icons/add.png" id="i_add"]
+[ext_resource type="Texture2D" path="res://assets/sprites/icons/remove.png" id="i_remove"]
+[ext_resource type="Texture2D" path="res://assets/sprites/icons/info.png" id="i_info"]
+[ext_resource type="Texture2D" path="res://assets/sprites/chips/healthy.png" id="chip_healthy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/mascots/wave.png" id="m_wave"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buildings/greenhouse.png" id="b_greenhouse"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buttons/build.png" id="btn_build"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buttons/research.png" id="btn_research"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buttons/explore.png" id="btn_explore"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buttons/cancel.png" id="btn_cancel"]
+[ext_resource type="Texture2D" path="res://assets/sprites/brand/logo.png" id="logo"]
+
+[node name="OutpostHUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("theme")
+script = ExtResource("script")
+
+[node name="SafeMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 16
+
+[node name="Layout" type="VBoxContainer" parent="SafeMargin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="TopBar" type="HBoxContainer" parent="SafeMargin/Layout"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="ResourcePanel" type="PanelContainer" parent="SafeMargin/Layout/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SpritePanel"
+
+[node name="Resources" type="HBoxContainer" parent="SafeMargin/Layout/TopBar/ResourcePanel"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Power" parent="SafeMargin/Layout/TopBar/ResourcePanel/Resources" instance=ExtResource("bar")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+resource_name = "Power"
+icon = ExtResource("i_power")
+value = 70.0
+
+[node name="Water" parent="SafeMargin/Layout/TopBar/ResourcePanel/Resources" instance=ExtResource("bar")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+resource_name = "Water"
+icon = ExtResource("i_water")
+value = 65.0
+healthy_variation = &"BarWater"
+
+[node name="Food" parent="SafeMargin/Layout/TopBar/ResourcePanel/Resources" instance=ExtResource("bar")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+resource_name = "Food"
+icon = ExtResource("i_food")
+value = 45.0
+
+[node name="Shield" parent="SafeMargin/Layout/TopBar/ResourcePanel/Resources" instance=ExtResource("bar")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+resource_name = "Radiation Shield"
+icon = ExtResource("i_shield")
+value = 85.0
+
+[node name="Status" type="VBoxContainer" parent="SafeMargin/Layout/TopBar"]
+layout_mode = 2
+mouse_filter = 2
+alignment = 1
+
+[node name="StatusChip" type="TextureRect" parent="SafeMargin/Layout/TopBar/Status"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 46)
+layout_mode = 2
+tooltip_text = "Outpost status"
+texture = ExtResource("chip_healthy")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DayPanel" type="PanelContainer" parent="SafeMargin/Layout/TopBar"]
+layout_mode = 2
+theme_type_variation = &"SpritePanel"
+
+[node name="Row" type="HBoxContainer" parent="SafeMargin/Layout/TopBar/DayPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="SafeMargin/Layout/TopBar/DayPanel/Row"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("i_calendar")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="SafeMargin/Layout/TopBar/DayPanel/Row"]
+layout_mode = 2
+theme_type_variation = &"HudLabel"
+text = "Mission
+Day"
+
+[node name="DayNumber" type="Label" parent="SafeMargin/Layout/TopBar/DayPanel/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 0)
+layout_mode = 2
+theme_type_variation = &"DayNumber"
+text = "12"
+horizontal_alignment = 1
+
+[node name="SettingsButton" type="TextureButton" parent="SafeMargin/Layout/TopBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Settings"
+texture_normal = ExtResource("i_settings")
+script = ExtResource("sprite_button")
+
+[node name="Middle" type="HBoxContainer" parent="SafeMargin/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="LeftColumn" type="VBoxContainer" parent="SafeMargin/Layout/Middle"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="MissionPanel" type="PanelContainer" parent="SafeMargin/Layout/Middle/LeftColumn"]
+layout_mode = 2
+theme_type_variation = &"StarPanel"
+
+[node name="Content" type="VBoxContainer" parent="SafeMargin/Layout/Middle/LeftColumn/MissionPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="SafeMargin/Layout/Middle/LeftColumn/MissionPanel/Content"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_type_variation = &"H2"
+text = "        Mission"
+vertical_alignment = 1
+
+[node name="Goal1" type="HBoxContainer" parent="SafeMargin/Layout/Middle/LeftColumn/MissionPanel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Check" type="TextureRect" parent="SafeMargin/Layout/Middle/LeftColumn/MissionPanel/Content/Goal1"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("i_box")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SafeMargin/Layout/Middle/LeftColumn/MissionPanel/Content/Goal1"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Build a Greenhouse"
+autowrap_mode = 3
+
+[node name="Goal2" type="HBoxContainer" parent="SafeMargin/Layout/Middle/LeftColumn/MissionPanel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Check" type="TextureRect" parent="SafeMargin/Layout/Middle/LeftColumn/MissionPanel/Content/Goal2"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("i_box")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SafeMargin/Layout/Middle/LeftColumn/MissionPanel/Content/Goal2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Keep resources balanced"
+autowrap_mode = 3
+
+[node name="Goal3" type="HBoxContainer" parent="SafeMargin/Layout/Middle/LeftColumn/MissionPanel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Check" type="TextureRect" parent="SafeMargin/Layout/Middle/LeftColumn/MissionPanel/Content/Goal3"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("i_box")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SafeMargin/Layout/Middle/LeftColumn/MissionPanel/Content/Goal3"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Research a new technology"
+autowrap_mode = 3
+
+[node name="Spacer" type="Control" parent="SafeMargin/Layout/Middle/LeftColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Bubble" type="PanelContainer" parent="SafeMargin/Layout/Middle/LeftColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BubbleWhite"
+
+[node name="Content" type="VBoxContainer" parent="SafeMargin/Layout/Middle/LeftColumn/Bubble"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="BubbleTitle" type="Label" parent="SafeMargin/Layout/Middle/LeftColumn/Bubble/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"DarkTitle"
+
+[node name="BubbleText" type="Label" parent="SafeMargin/Layout/Middle/LeftColumn/Bubble/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DarkBody"
+text = "Let's build a Greenhouse to produce food!"
+autowrap_mode = 3
+
+[node name="Mascot" type="TextureRect" parent="SafeMargin/Layout/Middle/LeftColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 120)
+layout_mode = 2
+size_flags_horizontal = 0
+texture = ExtResource("m_wave")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="WorldSpace" type="Control" parent="SafeMargin/Layout/Middle"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="BuildPopup" type="Control" parent="SafeMargin/Layout/Middle"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(340, 440)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="Card" type="PanelContainer" parent="SafeMargin/Layout/Middle/BuildPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"PopupCard"
+
+[node name="Content" type="VBoxContainer" parent="SafeMargin/Layout/Middle/BuildPopup/Card"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+theme_type_variation = &"H2"
+text = "Build Greenhouse?"
+vertical_alignment = 1
+
+[node name="Illustration" type="TextureRect" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content"]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+texture = ExtResource("b_greenhouse")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Effects" type="PanelContainer" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content"]
+layout_mode = 2
+theme_type_variation = &"TagPanel"
+
+[node name="Rows" type="VBoxContainer" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Uses" type="HBoxContainer" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Mark" type="TextureRect" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows/Uses"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("i_remove")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows/Uses"]
+custom_minimum_size = Vector2(104, 0)
+layout_mode = 2
+theme_type_variation = &"DarkCaption"
+text = "Will Use:"
+
+[node name="Water" type="TextureRect" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows/Uses"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("i_water")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Power" type="TextureRect" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows/Uses"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("i_power")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows/Uses"]
+layout_mode = 2
+theme_type_variation = &"DarkCaption"
+text = "Water, Power"
+
+[node name="Improves" type="HBoxContainer" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Mark" type="TextureRect" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows/Improves"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("i_add")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows/Improves"]
+custom_minimum_size = Vector2(104, 0)
+layout_mode = 2
+theme_type_variation = &"DarkCaption"
+text = "Will Improve:"
+
+[node name="Food" type="TextureRect" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows/Improves"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("i_food")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows/Improves"]
+layout_mode = 2
+theme_type_variation = &"DarkCaption"
+text = "More food"
+
+[node name="TradeOff" type="HBoxContainer" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Mark" type="TextureRect" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows/TradeOff"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("i_info")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows/TradeOff"]
+custom_minimum_size = Vector2(104, 0)
+layout_mode = 2
+theme_type_variation = &"DarkCaption"
+text = "Trade-off:"
+
+[node name="Value" type="Label" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Effects/Rows/TradeOff"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"DarkCaption"
+text = "Higher water use"
+autowrap_mode = 3
+
+[node name="Explanation" type="Label" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content"]
+layout_mode = 2
+theme_type_variation = &"Caption"
+text = "A greenhouse grows food, but it needs water and power."
+autowrap_mode = 3
+
+[node name="Actions" type="HBoxContainer" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CancelButton" type="TextureButton" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Cancel"
+texture_normal = ExtResource("btn_cancel")
+script = ExtResource("sprite_button")
+
+[node name="ConfirmButton" type="TextureButton" parent="SafeMargin/Layout/Middle/BuildPopup/Card/Content/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Build the greenhouse"
+texture_normal = ExtResource("btn_build")
+script = ExtResource("sprite_button")
+
+[node name="CloseButton" type="Button" parent="SafeMargin/Layout/Middle/BuildPopup"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -48.0
+offset_bottom = 48.0
+grow_horizontal = 0
+tooltip_text = "Close"
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="BottomBar" type="HBoxContainer" parent="SafeMargin/Layout"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="BuildButton" type="TextureButton" parent="SafeMargin/Layout/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(196, 68)
+layout_mode = 2
+tooltip_text = "Build a module"
+texture_normal = ExtResource("btn_build")
+script = ExtResource("sprite_button")
+
+[node name="ResearchButton" type="TextureButton" parent="SafeMargin/Layout/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(196, 68)
+layout_mode = 2
+tooltip_text = "Research technology"
+texture_normal = ExtResource("btn_research")
+script = ExtResource("sprite_button")
+
+[node name="ExploreButton" type="TextureButton" parent="SafeMargin/Layout/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(196, 68)
+layout_mode = 2
+tooltip_text = "Explore the Moon"
+texture_normal = ExtResource("btn_explore")
+script = ExtResource("sprite_button")
+
+[node name="Splash" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0314, 0.0588, 0.1686, 0.85)
+
+[node name="Logo" type="TextureRect" parent="Splash"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -110.0
+offset_right = 300.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("logo")
+expand_mode = 1
+stretch_mode = 5

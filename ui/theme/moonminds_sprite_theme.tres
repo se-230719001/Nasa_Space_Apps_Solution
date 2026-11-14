@@ -1,0 +1,74 @@
+[gd_resource type="Theme" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/panels/panel_plain.png" id="plain"]
+[ext_resource type="Texture2D" path="res://assets/sprites/panels/panel_star.png" id="star"]
+[ext_resource type="Texture2D" path="res://assets/sprites/panels/popup_close.png" id="popup"]
+[ext_resource type="Texture2D" path="res://assets/sprites/panels/bubble_white.png" id="bubble_w"]
+[ext_resource type="Texture2D" path="res://assets/sprites/panels/bubble_yellow.png" id="bubble_y"]
+
+[sub_resource type="StyleBoxTexture" id="plain_sb"]
+texture = ExtResource("plain")
+texture_margin_left = 28.0
+texture_margin_top = 28.0
+texture_margin_right = 28.0
+texture_margin_bottom = 28.0
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="star_sb"]
+texture = ExtResource("star")
+texture_margin_left = 60.0
+texture_margin_top = 50.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+content_margin_left = 18.0
+content_margin_top = 8.0
+content_margin_right = 18.0
+content_margin_bottom = 18.0
+
+[sub_resource type="StyleBoxTexture" id="popup_sb"]
+texture = ExtResource("popup")
+texture_margin_left = 26.0
+texture_margin_top = 50.0
+texture_margin_right = 52.0
+texture_margin_bottom = 24.0
+content_margin_left = 20.0
+content_margin_top = 16.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxTexture" id="bubble_w_sb"]
+texture = ExtResource("bubble_w")
+texture_margin_left = 44.0
+texture_margin_top = 20.0
+texture_margin_right = 22.0
+texture_margin_bottom = 28.0
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 26.0
+
+[sub_resource type="StyleBoxTexture" id="bubble_y_sb"]
+texture = ExtResource("bubble_y")
+texture_margin_left = 22.0
+texture_margin_top = 22.0
+texture_margin_right = 22.0
+texture_margin_bottom = 22.0
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 14.0
+
+[resource]
+SpritePanel/base_type = &"PanelContainer"
+SpritePanel/styles/panel = SubResource("plain_sb")
+StarPanel/base_type = &"PanelContainer"
+StarPanel/styles/panel = SubResource("star_sb")
+PopupCard/base_type = &"PanelContainer"
+PopupCard/styles/panel = SubResource("popup_sb")
+BubbleWhite/base_type = &"PanelContainer"
+BubbleWhite/styles/panel = SubResource("bubble_w_sb")
+BubbleYellow/base_type = &"PanelContainer"
+BubbleYellow/styles/panel = SubResource("bubble_y_sb")

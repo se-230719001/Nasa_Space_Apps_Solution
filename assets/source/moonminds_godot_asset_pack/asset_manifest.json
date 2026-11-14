@@ -1,0 +1,506 @@
+{
+  "backgrounds/lunar_base_header.png": {
+    "source_bbox": [
+      0,
+      0,
+      982,
+      176
+    ],
+    "size_px": [
+      982,
+      176
+    ]
+  },
+  "panels/panel_header_palette.png": {
+    "source_bbox": [
+      10,
+      183,
+      287,
+      361
+    ],
+    "size_px": [
+      277,
+      178
+    ]
+  },
+  "panels/panel_header_type.png": {
+    "source_bbox": [
+      292,
+      183,
+      538,
+      361
+    ],
+    "size_px": [
+      246,
+      178
+    ]
+  },
+  "panels/panel_header_buttons.png": {
+    "source_bbox": [
+      544,
+      183,
+      813,
+      361
+    ],
+    "size_px": [
+      269,
+      178
+    ]
+  },
+  "panels/panel_header_hud.png": {
+    "source_bbox": [
+      819,
+      183,
+      1127,
+      361
+    ],
+    "size_px": [
+      308,
+      178
+    ]
+  },
+  "panels/panel_feedback.png": {
+    "source_bbox": [
+      10,
+      369,
+      358,
+      515
+    ],
+    "size_px": [
+      348,
+      146
+    ]
+  },
+  "panels/panel_mascot_guide.png": {
+    "source_bbox": [
+      364,
+      369,
+      725,
+      515
+    ],
+    "size_px": [
+      361,
+      146
+    ]
+  },
+  "panels/panel_screen_preview.png": {
+    "source_bbox": [
+      730,
+      369,
+      1127,
+      515
+    ],
+    "size_px": [
+      397,
+      146
+    ]
+  },
+  "panels/popup_card.png": {
+    "source_bbox": [
+      505,
+      526,
+      730,
+      665
+    ],
+    "size_px": [
+      225,
+      139
+    ]
+  },
+  "buttons/build.png": {
+    "source_bbox": [
+      1144,
+      272,
+      1304,
+      328
+    ],
+    "size_px": [
+      160,
+      56
+    ]
+  },
+  "buttons/explore.png": {
+    "source_bbox": [
+      1308,
+      272,
+      1469,
+      328
+    ],
+    "size_px": [
+      161,
+      56
+    ]
+  },
+  "buttons/cancel.png": {
+    "source_bbox": [
+      1473,
+      272,
+      1635,
+      328
+    ],
+    "size_px": [
+      162,
+      56
+    ]
+  },
+  "buttons/research.png": {
+    "source_bbox": [
+      1144,
+      334,
+      1304,
+      390
+    ],
+    "size_px": [
+      160,
+      56
+    ]
+  },
+  "buttons/mission.png": {
+    "source_bbox": [
+      1308,
+      334,
+      1469,
+      390
+    ],
+    "size_px": [
+      161,
+      56
+    ]
+  },
+  "buttons/confirm.png": {
+    "source_bbox": [
+      1473,
+      334,
+      1635,
+      390
+    ],
+    "size_px": [
+      162,
+      56
+    ]
+  },
+  "buttons/disabled_build.png": {
+    "source_bbox": [
+      1142,
+      409,
+      1259,
+      464
+    ],
+    "size_px": [
+      117,
+      55
+    ]
+  },
+  "buttons/focus_build.png": {
+    "source_bbox": [
+      1264,
+      398,
+      1389,
+      468
+    ],
+    "size_px": [
+      125,
+      70
+    ]
+  },
+  "buttons/focus_explore.png": {
+    "source_bbox": [
+      1396,
+      398,
+      1519,
+      468
+    ],
+    "size_px": [
+      123,
+      70
+    ]
+  },
+  "buttons/focus_cancel.png": {
+    "source_bbox": [
+      1526,
+      398,
+      1641,
+      468
+    ],
+    "size_px": [
+      115,
+      70
+    ]
+  },
+  "mascots/mascot_wave.png": {
+    "source_bbox": [
+      16,
+      683,
+      159,
+      829
+    ],
+    "size_px": [
+      143,
+      146
+    ]
+  },
+  "mascots/mascot_think.png": {
+    "source_bbox": [
+      161,
+      683,
+      275,
+      829
+    ],
+    "size_px": [
+      114,
+      146
+    ]
+  },
+  "mascots/mascot_celebrate.png": {
+    "source_bbox": [
+      275,
+      683,
+      407,
+      829
+    ],
+    "size_px": [
+      132,
+      146
+    ]
+  },
+  "icons/power.png": {
+    "source_bbox": [
+      424,
+      684,
+      479,
+      735
+    ],
+    "size_px": [
+      55,
+      51
+    ]
+  },
+  "icons/water.png": {
+    "source_bbox": [
+      481,
+      684,
+      528,
+      735
+    ],
+    "size_px": [
+      47,
+      51
+    ]
+  },
+  "icons/food.png": {
+    "source_bbox": [
+      529,
+      684,
+      588,
+      735
+    ],
+    "size_px": [
+      59,
+      51
+    ]
+  },
+  "icons/radiation.png": {
+    "source_bbox": [
+      590,
+      684,
+      646,
+      735
+    ],
+    "size_px": [
+      56,
+      51
+    ]
+  },
+  "icons/calendar.png": {
+    "source_bbox": [
+      665,
+      684,
+      715,
+      735
+    ],
+    "size_px": [
+      50,
+      51
+    ]
+  },
+  "icons/settings.png": {
+    "source_bbox": [
+      412,
+      752,
+      467,
+      807
+    ],
+    "size_px": [
+      55,
+      55
+    ]
+  },
+  "icons/info.png": {
+    "source_bbox": [
+      468,
+      752,
+      520,
+      807
+    ],
+    "size_px": [
+      52,
+      55
+    ]
+  },
+  "icons/home.png": {
+    "source_bbox": [
+      521,
+      752,
+      576,
+      807
+    ],
+    "size_px": [
+      55,
+      55
+    ]
+  },
+  "icons/arrow_left.png": {
+    "source_bbox": [
+      578,
+      752,
+      611,
+      807
+    ],
+    "size_px": [
+      33,
+      55
+    ]
+  },
+  "icons/arrow_right.png": {
+    "source_bbox": [
+      612,
+      752,
+      645,
+      807
+    ],
+    "size_px": [
+      33,
+      55
+    ]
+  },
+  "icons/add.png": {
+    "source_bbox": [
+      646,
+      752,
+      691,
+      807
+    ],
+    "size_px": [
+      45,
+      55
+    ]
+  },
+  "icons/remove.png": {
+    "source_bbox": [
+      692,
+      752,
+      736,
+      807
+    ],
+    "size_px": [
+      44,
+      55
+    ]
+  },
+  "buildings/greenhouse.png": {
+    "source_bbox": [
+      952,
+      684,
+      1056,
+      768
+    ],
+    "size_px": [
+      104,
+      84
+    ]
+  },
+  "buildings/solar_panel.png": {
+    "source_bbox": [
+      1066,
+      684,
+      1153,
+      762
+    ],
+    "size_px": [
+      87,
+      78
+    ]
+  },
+  "buildings/habitat_module.png": {
+    "source_bbox": [
+      1152,
+      681,
+      1235,
+      765
+    ],
+    "size_px": [
+      83,
+      84
+    ]
+  },
+  "buildings/water_system.png": {
+    "source_bbox": [
+      1233,
+      681,
+      1307,
+      765
+    ],
+    "size_px": [
+      74,
+      84
+    ]
+  },
+  "buildings/research_lab.png": {
+    "source_bbox": [
+      1303,
+      681,
+      1378,
+      765
+    ],
+    "size_px": [
+      75,
+      84
+    ]
+  },
+  "buildings/main_base.png": {
+    "source_bbox": [
+      1330,
+      682,
+      1664,
+      820
+    ],
+    "size_px": [
+      334,
+      138
+    ]
+  },
+  "hud/resource_bars.png": {
+    "source_bbox": [
+      744,
+      681,
+      932,
+      809
+    ],
+    "size_px": [
+      188,
+      128
+    ]
+  },
+  "layout/spacing_shape_footer.png": {
+    "source_bbox": [
+      12,
+      837,
+      1344,
+      921
+    ],
+    "size_px": [
+      1332,
+      84
+    ]
+  }
+}

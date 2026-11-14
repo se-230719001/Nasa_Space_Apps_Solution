@@ -11,11 +11,14 @@ config_version=5
 [application]
 
 config/name="MoonMinds"
+run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="uid://cb4n5tj35s5r1"
 
 [display]
 
+window/size/viewport_width=1280
+window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
@@ -23,6 +26,10 @@ window/stretch/aspect="expand"
 
 version_control/plugin_name="GitPlugin"
 version_control/autoload_on_startup=true
+
+[gui]
+
+theme/custom="res://ui/theme/moonminds_theme.tres"
 
 [physics]
 
