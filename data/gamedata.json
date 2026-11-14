@@ -1,0 +1,37 @@
+{
+  "crops": [
+    {
+      "id": "red_lettuce",
+      "name": "Kırmızı Marul (VEG-01A)",
+      "nasa_source": "OSD-267",
+      "growth_days": 28,
+      "optimal_temp_c": 22,
+      "water_per_day": 1,
+      "energy_per_day": 2,
+      "led_spectrum": { "red": 80, "blue": 20, "green": 0 },
+      "food_output": 20
+    },
+    {
+      "id": "dwarf_tomato",
+      "name": "Cüce Domates (VEG-05)",
+      "nasa_source": "OSD-766",
+      "growth_days": 60,
+      "optimal_temp_c": 23,
+      "water_per_day": 2,
+      "energy_per_day": 4,
+      "led_spectrum": { "red": 90, "blue": 10, "green": 0 },
+      "food_output": 50
+    },
+    {
+      "id": "space_pepper",
+      "name": "Uzay Biberi (PH-04)",
+      "nasa_source": "OSD-772",
+      "growth_days": 100,
+      "optimal_temp_c": 24,
+      "water_per_day": 3,
+      "energy_per_day": 6,
+      "led_spectrum": { "red": 85, "blue": 15, "green": 0 },
+      "food_output": 90
+    }
+  ]
+}
