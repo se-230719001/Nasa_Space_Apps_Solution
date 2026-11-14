@@ -33,8 +33,11 @@ var _greenhouse_built := false
 
 func _ready() -> void:
 	%BuildButton.pressed.connect(_open_build_popup)
+	%BuildButton.pressed.connect(Music.play.bind(&"outpost"))
 	%ResearchButton.pressed.connect(_say.bind(&"info", "", "The research lab is coming soon. Build a greenhouse first!"))
+	%ResearchButton.pressed.connect(Music.play.bind(&"outpost"))
 	%ExploreButton.pressed.connect(_say.bind(&"info", "", "Exploring needs a rover. Let's grow food for the crew first!"))
+	%ExploreButton.pressed.connect(Music.play.bind(&"explore"))
 	%SettingsButton.pressed.connect(_say.bind(&"info", "", "Settings will live here."))
 	%CloseButton.pressed.connect(_close_build_popup)
 	%CancelButton.pressed.connect(_close_build_popup)
@@ -84,6 +87,7 @@ func _confirm_build() -> void:
 		var target := clampf(bar.value + GREENHOUSE_DELTA[key], 0.0, 100.0)
 		bar.animate_to(target, _status_for(target))
 	%Check.texture = CHECK
+	Music.stinger(&"mission_complete")
 	_update_status_chip()
 	build_confirmed.emit(&"greenhouse")
 

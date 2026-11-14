@@ -15,10 +15,15 @@ run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="uid://cb4n5tj35s5r1"
 
+[autoload]
+
+Music="*res://scenes/audio/music_director.gd"
+
 [display]
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
+window/size/mode=3
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
@@ -39,3 +44,4 @@ theme/custom="res://ui/theme/moonminds_theme.tres"
 
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
+anti_aliasing/quality/msaa_3d=2
