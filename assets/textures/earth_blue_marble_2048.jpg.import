@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://g1nv404ch303"
 path.s3tc="res://.godot/imported/earth_blue_marble_2048.jpg-e615b36e8db885b553376e4a6a467979.s3tc.ctex"
+path.etc2="res://.godot/imported/earth_blue_marble_2048.jpg-e615b36e8db885b553376e4a6a467979.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/earth_blue_marble_2048.jpg"
-dest_files=["res://.godot/imported/earth_blue_marble_2048.jpg-e615b36e8db885b553376e4a6a467979.s3tc.ctex"]
+dest_files=["res://.godot/imported/earth_blue_marble_2048.jpg-e615b36e8db885b553376e4a6a467979.s3tc.ctex", "res://.godot/imported/earth_blue_marble_2048.jpg-e615b36e8db885b553376e4a6a467979.etc2.ctex"]
 
 [params]
 

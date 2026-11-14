@@ -6,6 +6,9 @@ extends TextureButton
 ## squash, greyed disabled, and a glow ring for keyboard/controller focus.
 
 const HOVER_TINT := Color(1.12, 1.12, 1.12)
+## On touch devices there is no hover, and a tap would leave the button stuck
+## in its hover tint and focus ring, so both are desktop/keyboard only.
+static var _touch_only := OS.has_feature("mobile")
 const DISABLED_TINT := Color(0.55, 0.55, 0.65, 0.8)
 
 var _hovered := false
@@ -44,7 +47,7 @@ func _notification(what: int) -> void:
 
 
 func _draw() -> void:
-	if has_focus() and not Engine.is_editor_hint():
+	if has_focus() and not _touch_only and not Engine.is_editor_hint():
 		var r := _art_rect()
 		_focus_ring.set_corner_radius_all(int(r.size.y / 2))
 		draw_style_box(_focus_ring, r)
@@ -63,7 +66,7 @@ func _art_rect() -> Rect2:
 func _update_tint() -> void:
 	if disabled and texture_disabled == null:
 		self_modulate = DISABLED_TINT
-	elif _hovered and not disabled:
+	elif _hovered and not disabled and not _touch_only:
 		self_modulate = HOVER_TINT
 	else:
 		self_modulate = Color.WHITE

@@ -2,7 +2,6 @@
 
 [ext_resource type="Shader" uid="uid://cqyr0di66pal4" path="res://scenes/environment/earth.gdshader" id="earth_shader"]
 [ext_resource type="Texture2D" uid="uid://g1nv404ch303" path="res://assets/textures/earth_blue_marble_2048.jpg" id="earth_tex"]
-[ext_resource type="Shader" uid="uid://bigco2ushvd2n" path="res://scenes/environment/placement_grid.gdshader" id="grid_shader"]
 [ext_resource type="Shader" uid="uid://tird3o4ciq5f" path="res://scenes/environment/lunar_ground.gdshader" id="ground_shader"]
 [ext_resource type="Script" uid="uid://cqy3qn1oec0ud" path="res://scenes/buildings/habitat_base.gd" id="habitat"]
 [ext_resource type="PackedScene" path="res://ui/screens/outpost_hud.tscn" id="hud"]
@@ -11,6 +10,10 @@
 [ext_resource type="Shader" uid="uid://dg40rpv188c5u" path="res://scenes/environment/space_sky.gdshader" id="sky_shader"]
 [ext_resource type="Script" uid="uid://bjfc2gj7ooc3x" path="res://scenes/buildings/solar_array.gd" id="solar"]
 [ext_resource type="Script" uid="uid://dyj8iixsxvx7f" path="res://scenes/buildings/water_tank.gd" id="water"]
+[ext_resource type="Script" path="res://scenes/camera/touch_camera.gd" id="touch_camera"]
+[ext_resource type="Script" path="res://scenes/environment/colony_dome.gd" id="dome"]
+[ext_resource type="Script" path="res://scenes/world/build_grid.gd" id="grid"]
+[ext_resource type="Script" path="res://scenes/buildings/hangar.gd" id="hangar"]
 
 [sub_resource type="ShaderMaterial" id="sky_mat"]
 shader = ExtResource("sky_shader")
@@ -56,22 +59,12 @@ shader_parameter/regolith_dark = Color(0.34, 0.34, 0.37, 1)
 shader_parameter/regolith_light = Color(0.56, 0.56, 0.59, 1)
 shader_parameter/highland_tint = Color(0.62, 0.61, 0.62, 1)
 shader_parameter/pad_center = Vector3(0, 0, 0)
-shader_parameter/pad_radius = 9.0
+shader_parameter/pad_radius = 28.0
 shader_parameter/relief = 1.0
 
 [sub_resource type="PlaneMesh" id="ground"]
 material = SubResource("ground_mat")
 size = Vector2(2000, 2000)
-
-[sub_resource type="ShaderMaterial" id="grid_mat"]
-render_priority = 1
-shader = ExtResource("grid_shader")
-shader_parameter/color = Color(0.235, 0.86, 0.34, 1)
-shader_parameter/cells = 3.0
-
-[sub_resource type="PlaneMesh" id="tile"]
-material = SubResource("grid_mat")
-size = Vector2(4.2, 4.2)
 
 [node name="Main" type="Node3D" unique_id=1167444657]
 script = ExtResource("main")
@@ -90,6 +83,7 @@ directional_shadow_max_distance = 80.0
 transform = Transform3D(0.76657677, -0.35543084, 0.53481686, 0.028401047, 0.8508008, 0.5247203, -0.64152443, -0.38704902, 0.6622987, 21.646656, 22.31669, 23.22622)
 fov = 44.0
 far = 3000.0
+script = ExtResource("touch_camera")
 
 [node name="Earth" type="MeshInstance3D" parent="." unique_id=1855656865]
 transform = Transform3D(42.4429, 0, 0, 0, 42.4429, 0, 0, 0, 42.4429, -408.5039, 51.6527, -781.2224)
@@ -109,17 +103,22 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, -3.5)
 script = ExtResource("habitat")
 
 [node name="SolarArray" type="Node3D" parent="World" unique_id=1630883697]
-transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, 5.5, 0, -4.5)
+transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, 6, 0, -6)
 script = ExtResource("solar")
 
 [node name="WaterTank" type="Node3D" parent="World" unique_id=713608171]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 2)
 script = ExtResource("water")
 
-[node name="PlacementTile" type="MeshInstance3D" parent="World" unique_id=1309374935]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.04, 3.5)
-cast_shadow = 0
-mesh = SubResource("tile")
+[node name="Hangar" type="Node3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 6)
+script = ExtResource("hangar")
+
+[node name="Dome" type="Node3D" parent="World"]
+script = ExtResource("dome")
+
+[node name="BuildGrid" type="Node3D" parent="World"]
+script = ExtResource("grid")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1474336988]
 

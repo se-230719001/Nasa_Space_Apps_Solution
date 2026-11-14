@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/icons/power.png" id="2"]
 
 [node name="ResourceBar" type="HBoxContainer"]
-custom_minimum_size = Vector2(176, 48)
+custom_minimum_size = Vector2(98, 48)
 theme_override_constants/separation = 8
 script = ExtResource("1")
 icon = ExtResource("2")
@@ -15,6 +15,21 @@ custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
 size_flags_vertical = 4
 texture = ExtResource("2")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StatusIcon" type="TextureRect" parent="Icon"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -12.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 12.0
+grow_horizontal = 0
 expand_mode = 1
 stretch_mode = 5
 
@@ -34,14 +49,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"HudLabel"
 text = "Power"
-
-[node name="StatusIcon" type="TextureRect" parent="Column/Header"]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(18, 18)
-layout_mode = 2
-expand_mode = 1
-stretch_mode = 5
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="Bar" type="ProgressBar" parent="Column"]
 unique_name_in_owner = true

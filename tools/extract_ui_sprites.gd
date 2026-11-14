@@ -7,6 +7,9 @@ extends SceneTree
 ## crop edges into transparency (un-blending anti-aliased edges), drops neighbour
 ## fragments that touch the crop edge, and trims to content.
 ##
+## Buildings and the HUD resource icons come from a second, higher-resolution
+## sheet (assets/source/bina_buildleri.png) on a white background.
+##
 ## Run:  godot --headless --path . --script res://tools/extract_ui_sprites.gd
 
 const ATLAS := "res://assets/source/moonminds_godot_asset_pack/atlas/moonminds_full_sprite_atlas.png"
@@ -49,10 +52,6 @@ const SPRITES := {
 	"icons/close": [700, 524, 746, 566],
 	"icons/warning": [1346, 500, 1394, 541, Vector2i(1342, 520)],
 	"icons/critical": [1512, 500, 1558, 541],
-	"icons/power": [426, 684, 484, 752],
-	"icons/water": [484, 684, 536, 752],
-	"icons/food": [536, 684, 598, 752],
-	"icons/shield": [598, 684, 662, 752],
 	"icons/calendar": [666, 694, 732, 756],
 	"icons/settings": [412, 758, 474, 820],
 	"icons/info": [472, 758, 532, 820],
@@ -61,17 +60,29 @@ const SPRITES := {
 	"icons/arrow_right": [620, 764, 652, 812],
 	"icons/add": [650, 760, 698, 816],
 	"icons/remove": [696, 760, 746, 816],
-	"buildings/greenhouse": [962, 692, 1074, 778],
-	"buildings/solar_panel": [1074, 692, 1166, 780],
-	"buildings/habitat": [1164, 692, 1248, 774],
-	"buildings/water_system": [1246, 692, 1318, 774],
-	"buildings/research_lab": [1316, 690, 1398, 774],
-	"buildings/main_base": [1350, 690, 1670, 842],
 	"backgrounds/lunar_header": [0, 0, 996, 178, true],
 }
 
 
+## Second source: building renders + resource icons on white (full-res pixels).
+const BUILDING_SHEET := "res://assets/source/bina_buildleri.png"
+const BUILDING_SPRITES := {
+	"buildings/habitat": [431, 444, 732, 711],
+	"buildings/water_system": [883, 439, 1136, 711],
+	"buildings/research_lab": [1293, 431, 1581, 718],
+	"buildings/greenhouse": [1737, 405, 2195, 745],
+	"buildings/solar_panel": [2477, 496, 2748, 731],
+	"buildings/main_base": [444, 1097, 1510, 1672],
+	"icons/power": [3062, 444, 3229, 640],
+	"icons/water": [3305, 439, 3469, 627],
+	"icons/food": [3527, 457, 3731, 640],
+	"icons/shield": [3801, 431, 4010, 645],
+}
+const MAX_SIZE := {"buildings": 512, "icons": 128}
+
+
 func _init() -> void:
+	_extract_building_sheet()
 	var atlas := Image.load_from_file(ProjectSettings.globalize_path(ATLAS))
 	atlas.convert(Image.FORMAT_RGBA8)
 	for sprite_name: String in SPRITES:
@@ -86,6 +97,25 @@ func _init() -> void:
 		img.save_png(ProjectSettings.globalize_path(path))
 		print("%-28s %s" % [sprite_name, img.get_size()])
 	quit()
+
+
+func _extract_building_sheet() -> void:
+	var sheet := Image.load_from_file(ProjectSettings.globalize_path(BUILDING_SHEET))
+	sheet.convert(Image.FORMAT_RGBA8)
+	for sprite_name: String in BUILDING_SPRITES:
+		var r: Array = BUILDING_SPRITES[sprite_name]
+		var img := sheet.get_region(Rect2i(r[0], r[1], r[2] - r[0], r[3] - r[1]))
+		_remove_backdrop(img, Color.WHITE)
+		_drop_edge_fragments(img)
+		img = _trim(img)
+		var limit: int = MAX_SIZE[sprite_name.get_slice("/", 0)]
+		var k := float(limit) / maxf(img.get_width(), img.get_height())
+		if k < 1.0:
+			img.resize(maxi(1, roundi(img.get_width() * k)), maxi(1, roundi(img.get_height() * k)), Image.INTERPOLATE_LANCZOS)
+		var path := OUT + sprite_name + ".png"
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path.get_base_dir()))
+		img.save_png(ProjectSettings.globalize_path(path))
+		print("%-28s %s" % [sprite_name, img.get_size()])
 
 
 static func _dist(a: Color, b: Color) -> float:

@@ -9,7 +9,7 @@ uniform vec3 regolith_dark : source_color = vec3(0.34, 0.34, 0.37);
 uniform vec3 regolith_light : source_color = vec3(0.56, 0.56, 0.59);
 uniform vec3 highland_tint : source_color = vec3(0.62, 0.61, 0.62);
 uniform vec3 pad_center = vec3(0.0, 0.0, 0.0);
-uniform float pad_radius = 9.0;
+uniform float pad_radius = 28.0;  // flat ground under the whole (grown) dome
 uniform float relief = 1.0;
 
 varying vec3 world_pos;

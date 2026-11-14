@@ -6,8 +6,8 @@ extends Node3D
 const ROCK_SHADER := preload("res://scenes/environment/rock.gdshader")
 
 @export var count := 40
-@export var inner_radius := 11.0
-@export var outer_radius := 70.0
+@export var inner_radius := 30.0  ## outside the largest colony dome
+@export var outer_radius := 85.0
 @export var rng_seed := 3
 
 

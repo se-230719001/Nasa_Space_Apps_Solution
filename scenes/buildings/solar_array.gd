@@ -1,17 +1,15 @@
 @tool
 class_name SolarArray
 extends OutpostModule
-## Two rows of tilted solar panels on struts.
+## Energy Center: two rows of tilted solar panels; every level adds panels,
+## Lv3+ adds battery blocks with charge lights.
 
 const K := preload("res://scenes/buildings/building_kit.gd")
-@export var columns := 3:
-	set(v):
-		columns = v
-		if is_inside_tree():
-			rebuild()
+var columns := 3
 
 
 func _build(root: Node3D) -> void:
+	columns = 2 + level
 	for row in 2:
 		for col in columns:
 			var p := Vector3((col - (columns - 1) / 2.0) * 1.25, 0, row * 1.7 - 0.85)
@@ -25,3 +23,8 @@ func _build(root: Node3D) -> void:
 	K.add(root, K.box(Vector3(columns * 1.25, 0.12, 0.18)), &"dark", Vector3(0, 0.12, 0))
 	K.add(root, K.box(Vector3(0.5, 0.45, 0.4)), &"panel", Vector3(-columns * 0.62 - 0.3, 0.22, 0))
 	K.add(root, K.box(Vector3(0.3, 0.06, 0.04)), &"window", Vector3(-columns * 0.62 - 0.3, 0.32, 0.21))
+	if level >= 3:
+		for i in level - 1:
+			var p := Vector3(-columns * 0.62 - 0.3, 0.3, -0.7 - i * 0.55)
+			K.add(root, K.box(Vector3(0.6, 0.6, 0.45)), &"dark", p)
+			K.add(root, K.box(Vector3(0.3, 0.08, 0.05)), &"green_light", p + Vector3(0, 0.15, 0.24))

@@ -64,6 +64,31 @@ static func mat(id: StringName) -> StandardMaterial3D:
 			m.emission = Color("#00C6FF")
 			m.emission_energy_multiplier = 0.9
 			m.roughness = 0.05
+		&"lab_glow":
+			m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			m.albedo_color = Color(0.69, 0.42, 1.0, 0.75)
+			m.emission_enabled = true
+			m.emission = Color("#B06CFF")
+			m.emission_energy_multiplier = 1.4
+			m.roughness = 0.1
+		&"red":
+			m.albedo_color = Color("#FF4961")
+			m.emission_enabled = true
+			m.emission = Color("#FF4961")
+			m.emission_energy_multiplier = 0.8
+		&"green_light":
+			m.albedo_color = Color("#3CDB56")
+			m.emission_enabled = true
+			m.emission = Color("#3CDB56")
+			m.emission_energy_multiplier = 2.5
+		&"grow_light":
+			m.albedo_color = Color("#B06CFF")
+			m.emission_enabled = true
+			m.emission = Color("#D08CFF")
+			m.emission_energy_multiplier = 2.2
+		&"regolith":
+			m.albedo_color = Color(0.5, 0.5, 0.54)
+			m.roughness = 1.0
 		&"lamp":
 			m.albedo_color = Color.WHITE
 			m.emission_enabled = true

@@ -1,8 +1,9 @@
 @tool
 class_name HabitatBase
 extends OutpostModule
-## Main outpost: a long habitat module, a domed command hub and a side module,
-## on a landing pad. Rounded, toy-like 3D forms (style guide §2.3).
+## Life Support Center (main base): command hub + long habitat on a pad.
+## Lv2 + a side module (more beds); Lv3 + a second side module and oxygen
+## tanks; Lv4 + a glowing Sabatier tower that turns CO2 back into water.
 
 const K := preload("res://scenes/buildings/building_kit.gd")
 
@@ -44,9 +45,28 @@ func _build(root: Node3D) -> void:
 	K.add(hub, K.cylinder(0.75, 0.25, 32, 0.08), &"frame", Vector3(0.2, 4.1, 0.0), Vector3(-35, 0, 15))
 	K.add(hub, K.sphere(0.12), &"lamp", Vector3(0.2, 4.3, 0.0))
 
-	# Side module along Z, joined by a tunnel
+	# Side modules along Z (more beds per level)
+	if level >= 2:
+		_side_module(root, Vector3(1.4, 1.2, -2.6))
+	if level >= 3:
+		_side_module(root, Vector3(-1.6, 1.2, -2.6))
+		for x in [3.2, 3.9]:
+			K.add(root, K.capsule(0.28, 1.6), &"frame", Vector3(x, 0.4, -2.4), Vector3(90, 0, 0))
+			K.add(root, K.torus(0.26, 0.32), &"water", Vector3(x, 0.4, -2.4), Vector3(90, 0, 0))
+	if level >= 4:
+		K.add(root, K.cylinder(0.45, 3.2), &"hull", Vector3(4.3, 1.6, 0.2))
+		K.add(root, K.cylinder(0.47, 0.6), &"lab_glow", Vector3(4.3, 2.4, 0.2))
+		K.add(root, K.torus(0.42, 0.55), &"trim", Vector3(4.3, 3.2, 0.2))
+		K.add(root, K.sphere(0.12), &"green_light", Vector3(4.3, 3.35, 0.2))
+
+	# Small lamp post
+	K.add(root, K.cylinder(0.05, 2.2), &"dark", Vector3(4.6, 1.1, 2.6))
+	K.add(root, K.sphere(0.14), &"lamp", Vector3(4.6, 2.25, 2.6))
+
+
+func _side_module(root: Node3D, at: Vector3) -> void:
 	var side := Node3D.new()
-	side.position = Vector3(1.4, 1.2, -2.6)
+	side.position = at
 	root.add_child(side)
 	K.add(side, K.capsule(0.95, 3.6), &"hull", Vector3.ZERO, Vector3(90, 0, 0))
 	K.add(side, K.torus(0.92, 1.04), &"trim", Vector3(0, 0, 0.6), Vector3(90, 0, 0))
@@ -56,7 +76,3 @@ func _build(root: Node3D) -> void:
 	for x in [-0.6, 0.6]:
 		for z in [-1.0, 1.0]:
 			K.add(side, K.box(Vector3(0.2, 0.75, 0.2)), &"dark", Vector3(x, -0.8, z))
-
-	# Small lamp post
-	K.add(root, K.cylinder(0.05, 2.2), &"dark", Vector3(4.6, 1.1, 2.6))
-	K.add(root, K.sphere(0.14), &"lamp", Vector3(4.6, 2.25, 2.6))
