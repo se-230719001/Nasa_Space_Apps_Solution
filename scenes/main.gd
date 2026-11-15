@@ -6,7 +6,7 @@ extends Node3D
 
 func _ready() -> void:
 	$UI/OutpostHUD.build_confirmed.connect(_on_build_confirmed)
-	Music.play(&"outpost")
+	Events.screen_changed.emit(&"outpost")
 
 
 func _on_build_confirmed(module_id: StringName) -> void:

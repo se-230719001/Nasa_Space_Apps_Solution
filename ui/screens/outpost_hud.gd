@@ -50,11 +50,13 @@ var _checklist_tween: Tween
 
 func _ready() -> void:
 	%BuildButton.pressed.connect(_open_build_popup)
-	%BuildButton.pressed.connect(Music.play.bind(&"outpost"))
+	%BuildButton.pressed.connect(Events.screen_changed.emit.bind(&"outpost"))
 	%SearchButton.pressed.connect(_say.bind(&"info", "", "The research lab is coming soon. Build a greenhouse first!"))
-	%SearchButton.pressed.connect(Music.play.bind(&"outpost"))
+	%SearchButton.pressed.connect(Events.screen_changed.emit.bind(&"outpost"))
 	%ExploreButton.pressed.connect(_say.bind(&"info", "", "Exploring needs a rover. Let's grow food for the crew first!"))
-	%ExploreButton.pressed.connect(Music.play.bind(&"explore"))
+	%ExploreButton.pressed.connect(Events.screen_changed.emit.bind(&"explore"))
+	for button in find_children("*", "BaseButton", true, false):
+		button.pressed.connect(Events.button_pressed.emit.bind(StringName(button.name)))
 	%SettingsButton.pressed.connect(_say.bind(&"info", "", "Settings will live here."))
 	%CloseButton.pressed.connect(_close_build_popup)
 	%CancelButton.pressed.connect(_close_build_popup)
@@ -149,6 +151,7 @@ func complete_task(id: StringName) -> void:
 	if _done.get(id, false) or not _task_rows.has(id):
 		return
 	_done[id] = true
+	Events.task_completed.emit(id)
 	_refresh_task(id)
 	_refresh_task_count()
 	var row: Control = _task_rows[id]
@@ -184,18 +187,21 @@ func _open_build_popup() -> void:
 		_say(&"info", "", "Your greenhouse is growing food! More modules are coming soon.")
 		return
 	_popup.visible = true
+	Events.build_popup_opened.emit(&"greenhouse")
 	_popup.modulate.a = 0.0
 	create_tween().tween_property(_popup, "modulate:a", 1.0, 0.2)
 	%ConfirmButton.grab_focus()
 
 
-func _close_build_popup() -> void:
+func _close_build_popup(cancelled := true) -> void:
+	if cancelled and _popup.visible:
+		Events.build_cancelled.emit(&"greenhouse")
 	_popup.visible = false
 	%BuildButton.grab_focus()
 
 
 func _confirm_build() -> void:
-	_close_build_popup()
+	_close_build_popup(false)
 	_greenhouse_built = true
 	var targets := {}
 	for key in GREENHOUSE_DELTA:
@@ -203,10 +209,11 @@ func _confirm_build() -> void:
 		targets[key] = clampf(bar.value + GREENHOUSE_DELTA[key], 0.0, 100.0)
 		bar.animate_to(targets[key], _status_for(targets[key]))
 		_show_delta(bar, GREENHOUSE_DELTA[key])
+		Events.resource_changed.emit(key, GREENHOUSE_DELTA[key])
 	complete_task(&"greenhouse")
-	Music.stinger(&"mission_complete")
 	_update_health(targets)
 	build_confirmed.emit(&"greenhouse")
+	Events.build_confirmed.emit(&"greenhouse")
 
 	if _bars[&"power"].status != ResourceBar.Status.HEALTHY:
 		_say(&"warning", "Need more power!",

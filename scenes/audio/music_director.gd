@@ -34,6 +34,8 @@ func _ready() -> void:
 		var s: AudioStream = TRACKS[key]
 		if "loop" in s:
 			s.loop = true
+	Events.screen_changed.connect(play)
+	Events.task_completed.connect(func(_task): stinger(&"mission_complete"))
 
 
 ## Crossfades to a track; does nothing if it is already playing.

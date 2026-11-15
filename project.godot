@@ -17,7 +17,9 @@ config/icon="uid://cb4n5tj35s5r1"
 
 [autoload]
 
+Events="*res://scenes/core/events.gd"
 Music="*res://scenes/audio/music_director.gd"
+Sfx="*res://scenes/audio/sfx_director.gd"
 
 [display]
 
@@ -42,9 +44,7 @@ theme/custom="res://ui/theme/moonminds_theme.tres"
 
 [rendering]
 
-# Large source art is drawn small in the HUD: mipmaps keep it smooth.
-textures/canvas_textures/default_texture_filter=3
-
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
 anti_aliasing/quality/msaa_3d=2
+#LargesourceartisdrawnsmallintheHUD:mipmapskeepitsmooth.textures/canvas_textures/default_texture_filter=3

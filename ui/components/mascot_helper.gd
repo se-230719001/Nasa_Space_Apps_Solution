@@ -1,7 +1,7 @@
 extends HBoxContainer
 ## Astronaut helper (bottom-left): mascot portrait badge + dialogue card.
 ## Breathes while idle, squash-swaps into each new pose, types messages out
-## with a blip, reacts to taps, and tucks itself away when it has nothing to
+## (announcing each beat on Events so the audio layer can blip), reacts to taps, and tucks itself away when it has nothing to
 ## say. Reactions are layered on top of the breathing (never replace it), so
 ## motion never jumps between animations.
 
@@ -33,15 +33,10 @@ var _tuck_tween: Tween
 var _hidden := false
 var _shift := 0.0  # how far the helper is currently tucked down
 var _idle := 0.0
-var _blip := AudioStreamPlayer.new()
 var _last_char := 0
 
 
 func _ready() -> void:
-	_blip.stream = _make_blip()
-	_blip.bus = &"SFX"
-	_blip.volume_db = -14.0
-	add_child(_blip)
 	_mascot.mouse_filter = Control.MOUSE_FILTER_STOP
 	_mascot.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_mascot.gui_input.connect(_on_mascot_input)
@@ -71,19 +66,19 @@ func say(kind: StringName, title: String, text: String) -> void:
 	var pop := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	pop.tween_property(_bubble, "scale", Vector2(1.04, 1.04), 0.08)
 	pop.tween_property(_bubble, "scale", Vector2.ONE, 0.18)
-	# Typewriter with a blip every couple of letters.
+	# Typewriter; every couple of letters is announced for the audio layer.
 	_text.visible_characters = 0
 	_last_char = 0
 	create_tween().tween_method(_type_to, 0, text.length(), text.length() / TYPE_SPEED)
 	_react(kind)
+	Events.mascot_said.emit(kind)
 
 
 func _type_to(count: int) -> void:
 	_text.visible_characters = count
 	if count - _last_char >= 2 and _text.text.substr(count - 1, 1) != " ":
 		_last_char = count
-		_blip.pitch_scale = randf_range(0.9, 1.15)
-		_blip.play()
+		Events.mascot_typed.emit()
 
 
 ## Squash, swap the pose at the squash's peak, spring back, then a
@@ -133,18 +128,3 @@ func _set_shift(value: float) -> void:
 	offset_bottom += value - _shift
 	_shift = value
 
-
-## Short square-wave "blip" for the typewriter, built in code (no asset needed).
-static func _make_blip() -> AudioStreamWAV:
-	var rate := 22050
-	var data := PackedByteArray()
-	var n := int(rate * 0.035)
-	for i in n:
-		var env := 1.0 - float(i) / n
-		var v := (1.0 if fmod(i * 880.0 / rate, 1.0) < 0.5 else -1.0) * env * 0.5
-		data.append(int(v * 127.0) & 0xFF)
-	var wav := AudioStreamWAV.new()
-	wav.format = AudioStreamWAV.FORMAT_8_BITS
-	wav.mix_rate = rate
-	wav.data = data
-	return wav
