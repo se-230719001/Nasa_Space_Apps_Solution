@@ -33,10 +33,6 @@ Rules for `events.gd`:
 - Audio needs a hook that doesn't exist → ask the gameplay side (or add the signal and leave
   a `# TODO(gameplay): emit this when …` next to it). Don't edit gameplay files to emit it.
 
-Current signals: `screen_changed`, `button_pressed`, `build_popup_opened`, `build_cancelled`,
-`build_confirmed`, `resource_changed`, `task_completed`, `mascot_said`, `mascot_typed`,
-`mission_ended`.
-
 ## Git on a shared branch
 
 - `git pull --rebase` before starting and before every push.
@@ -58,6 +54,11 @@ Current signals: `screen_changed`, `button_pressed`, `build_popup_opened`, `buil
   `<godot> --headless --path . --script <file>`.
 - Screenshot: same kind of script without `--headless`, `--resolution 1280x720 --windowed`,
   then `root.get_texture().get_image().save_png(path)` after ~150 frames (splash fades first).
+- Tests (exit 0 = pass): `<godot> --headless --path . --script res://tools/tests/test_simulation.gd`
+  (sim rules), `test_hud_flow.gd` (start → 8 days → win), `test_learning_flow.gd`, `test_hud_ui.gd`, `test_stories.gd`, `test_nasa_db.gd`, `test_mission_cards.gd`, `test_base_grid.gd`, `test_rewards.gd`, `test_full_runs.gd` (all 3 campaigns end to end). Keep them green.
+- New Events signals since the audio side last synced are listed in `audio_handoff.md`.
+- NASA sources live in `nasa_db/` (raw untouched, processed + `manifest.csv`); rebuild with
+  `python3 -I tools/nasa/build_nasa_db.py`. No file without a manifest row; never write an API key.
 - Ignore the `git_plugin` dylib errors at startup; they're from a missing editor plugin binary.
 
 ## Gameplay-side conventions
@@ -83,7 +84,5 @@ Current signals: `screen_changed`, `button_pressed`, `build_popup_opened`, `buil
 
 - Buses: `Music`, `SFX` (`default_bus_layout.tres`).
 - New sound: drop the file in `assets/audio/sfx/`, add credit/source to `assets/audio/CREDITS.md`,
-  map it in `SOUNDS` in `sfx_director.gd` under the event's key. Keys already handled:
-  `button_pressed`, `build_popup_opened`, `build_cancelled`, `build_confirmed`, `resource_up`,
-  `resource_down`, `mascot_info`/`mascot_warning`/`mascot_success`, `mascot_typed`.
+  map it in `SOUNDS` in `sfx_director.gd` under the event's key.
 - Music tracks: `TRACKS` in `music_director.gd`, switched by `Events.screen_changed`.
