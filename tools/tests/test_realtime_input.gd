@@ -36,6 +36,8 @@ func card_text() -> String:
 		for n in top_card().find_children("*", "", true, false):
 			if (n is Label or n is Button) and n.is_visible_in_tree():
 				t += n.text + "|"
+			elif n is RichTextLabel and n.is_visible_in_tree():
+				t += n.get_parsed_text() + "|"
 	return t
 
 
@@ -81,7 +83,16 @@ func _initialize() -> void:
 	colony.delete_save()
 	change_scene_to_file("res://scenes/main.tscn")
 	await wait(2.6)
+	while hud() == null or not hud().has_node("TitleScreen"):  # slower machines
+		await wait(0.2)
+	await wait(0.4)
 	var shots := OS.get_environment("SHOT")
+
+	# --- Title: the same Settings in the top-right corner ---
+	await click(hud().get_node("TitleScreen").find_child("TitleSettings", true, false))
+	check("title: Settings opens", "Settings" in card_text() and "Tutorial" in card_text())
+	await press_esc()
+	check("title: Settings closes, title stays", top_card() == null and hud().has_node("TitleScreen"))
 
 	# --- Title -> campaign -> name -> flag -> briefing, all by clicks ---
 	await click(hud().get_node("TitleScreen").find_child("NewButton", true, false))

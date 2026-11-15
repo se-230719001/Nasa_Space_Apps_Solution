@@ -325,36 +325,36 @@ theme_override_constants/separation = 14
 
 [node name="SearchButton" type="Button" parent="ActionButtons/Secondary"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 100)
+custom_minimum_size = Vector2(130, 100)
 layout_mode = 2
 tooltip_text = "Research technology"
 mouse_default_cursor_shape = 2
 theme_override_constants/icon_max_width = 46
 theme_override_constants/h_separation = 2
-theme_override_font_sizes/font_size = 18
-text = "Research"
+theme_override_font_sizes/font_size = 16
+text = "RESEARCH"
 icon = ExtResource("i_search")
 icon_alignment = 1
 vertical_icon_alignment = 0
 
 [node name="ExploreButton" type="Button" parent="ActionButtons/Secondary"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 100)
+custom_minimum_size = Vector2(130, 100)
 layout_mode = 2
 tooltip_text = "Explore space"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"IconButton"
 theme_override_constants/icon_max_width = 46
 theme_override_constants/h_separation = 2
-theme_override_font_sizes/font_size = 18
-text = "Explore"
+theme_override_font_sizes/font_size = 16
+text = "EXPLORE"
 icon = ExtResource("i_explore")
 icon_alignment = 1
 vertical_icon_alignment = 0
 
 [node name="BuildButton" type="Button" parent="ActionButtons"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(214, 84)
+custom_minimum_size = Vector2(274, 84)
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "Build a module"
@@ -362,7 +362,7 @@ mouse_default_cursor_shape = 2
 theme_type_variation = &"PrimaryButton"
 theme_override_constants/icon_max_width = 44
 theme_override_font_sizes/font_size = 32
-text = "Build"
+text = "BUILD"
 icon = ExtResource("i_build")
 
 [node name="BuildPopup" type="Control" parent="."]
@@ -508,7 +508,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0314, 0.0588, 0.1686, 0.85)
+color = Color(0.0314, 0.0588, 0.1686, 1)
 
 [node name="Logo" type="TextureRect" parent="Splash"]
 layout_mode = 1
@@ -527,3 +527,22 @@ mouse_filter = 2
 texture = ExtResource("logo")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="Credit" type="Label" parent="Splash"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -96.0
+offset_right = 300.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_type_variation = &"Caption"
+text = "Created for NASA Space Apps İzmir
+by PixelPulsars"
+horizontal_alignment = 1
+vertical_alignment = 1

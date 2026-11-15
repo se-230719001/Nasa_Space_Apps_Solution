@@ -116,6 +116,8 @@ var _trend := {}
 
 
 func _ready() -> void:
+	for bus in SOUND_BUSES:  # the player's Music / Sound FX choice from last time
+		_set_sound(bus, _sound_on(bus), false)
 	%BuildButton.pressed.connect(_open_menu.bind(&"build"))
 	%SearchButton.pressed.connect(_open_menu.bind(&"search"))
 	%ExploreButton.pressed.connect(_open_menu.bind(&"explore"))
@@ -207,11 +209,20 @@ func _dismiss(overlay: Control) -> void:
 	overlay.queue_free()
 
 
+## The logo and credits, only when the app opens (not on every reload).
 func _play_splash() -> void:
 	var splash: Control = %Splash
+	if Colony.session_chosen or Colony.save_offered:
+		splash.hide()
+		_start_flow.call_deferred()
+		return
 	splash.show()
+	var logo: Control = splash.get_node("Logo")
+	logo.pivot_offset = logo.size / 2.0
+	logo.scale = Vector2(0.8, 0.8)
 	var tween := create_tween()
-	tween.tween_interval(1.4)
+	tween.tween_property(logo, "scale", Vector2.ONE, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(1.1)
 	tween.tween_property(splash, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(splash.hide)
 	tween.tween_callback(%BuildButton.grab_focus)
@@ -670,6 +681,7 @@ func _on_task_completed(task: Dictionary) -> void:
 	_refresh_goals()
 	_refresh_today()
 	_bounce(%TodayCard)
+	_celebrate(1)
 	_say.call_deferred(&"success", "Task done!", "%s. You earned %d build kits!" \
 		% [task.text, int(OutpostSimulation.TASK_KITS)] if _bars_on() else "%s. Great work!" % task.text)
 
@@ -681,6 +693,54 @@ func _on_day_cleared(day: int) -> void:
 	# After the per-task cheer (also deferred) so this one stays on screen.
 	_say.call_deferred(&"success", "Day %d complete!" % day,
 		"Great work! The mission is almost done..." if last else "All tasks done. Night is coming, then day %d starts!" % (day + 1))
+
+
+## A happy moment: a soft golden flash, confetti from both bottom corners and a
+## short buzz on phones. 1 = a mission, 2 = rewards, 3 = the whole training.
+## Never blocks taps and is gone in about 1.5 s.
+func _celebrate(power := 1) -> void:
+	var flash := ColorRect.new()
+	flash.name = "Flash"
+	flash.color = Color(1.0, 0.86, 0.4, 0.0)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	flash.z_index = 8
+	add_child(flash)
+	var t := flash.create_tween()
+	t.tween_property(flash, "color:a", 0.18 + 0.06 * power, 0.12)
+	t.tween_property(flash, "color:a", 0.0, 0.45)
+	t.tween_callback(flash.queue_free)
+	var colors := Gradient.new()  # each piece picks one of the game's colours
+	colors.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CONSTANT
+	colors.offsets = PackedFloat32Array([0.0, 0.2, 0.4, 0.6, 0.8])
+	colors.colors = PackedColorArray([Color("#FFC94A"), Color("#4F6BFF"), Color("#FF4D6D"), Color("#3CDB56"), Color("#00C6FF")])
+	for side in [-1.0, 1.0]:
+		var c := CPUParticles2D.new()
+		c.name = "Confetti"
+		c.z_index = 8
+		c.position = Vector2(size.x / 2.0 - side * (size.x / 2.0 - 20.0), size.y + 10.0)
+		c.one_shot = true
+		c.explosiveness = 0.85
+		c.amount = 40 * power
+		c.lifetime = 1.4
+		c.direction = Vector2(side * 0.45, -1.0)
+		c.spread = 18.0
+		c.initial_velocity_min = 520.0
+		c.initial_velocity_max = 820.0
+		c.gravity = Vector2(0, 700)
+		c.damping_min = 20.0
+		c.damping_max = 60.0
+		c.angle_min = 0.0
+		c.angle_max = 360.0
+		c.angular_velocity_min = -360.0
+		c.angular_velocity_max = 360.0
+		c.scale_amount_min = 6.0
+		c.scale_amount_max = 11.0
+		c.color_initial_ramp = colors
+		add_child(c)
+		c.emitting = true
+		c.finished.connect(c.queue_free)
+	Input.vibrate_handheld(40 * power)  # does nothing on desktop
 
 
 func _bounce(node: Control) -> void:
@@ -885,6 +945,8 @@ func _show_mission_end(result: Dictionary) -> void:
 		body = "%s\n%s training done! The crew finished with %d%% health. Nights waited: %d." % [
 			"★".repeat(int(result.stars)) + "☆".repeat(3 - int(result.stars)),
 			OutpostSimulation.CAMPAIGNS[state.campaign].name, roundi(state.crew_health), int(state.get("nights_waited", 0))]
+	if won:
+		_celebrate(3)
 	_modal("Mission Complete!" if won else "Mission Failed", "mascot_celebrate" if won else "mascot_think", body,
 		[["Play Again", func() -> void:
 			Colony.reset()
@@ -980,8 +1042,32 @@ func _modal(title_text: String, art_name: String, body_text: String, buttons: Ar
 		b.pressed.connect(buttons[i][1])
 		row.add_child(b)
 	row.get_child(0).grab_focus()
+	card.modulate.a = 0.0
+	dim.modulate.a = 0.0
+	_pop_in.call_deferred(card, dim)
 	_fit_card.call_deferred(card)
 	return overlay
+
+
+## Cards spring up from a little smaller while the dark backdrop fades in.
+func _pop_in(card: Control, dim: Control) -> void:
+	await get_tree().process_frame
+	if not is_instance_valid(card):
+		return
+	card.pivot_offset = card.size / 2.0
+	card.scale = Vector2(0.86, 0.86)
+	var tw := card.create_tween().set_parallel()
+	tw.tween_property(card, "scale", Vector2.ONE, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(card, "modulate:a", 1.0, 0.15)
+	tw.tween_property(dim, "modulate:a", 1.0, 0.2)
+
+
+## A small "no" shake of a card.
+func _shake(c: Control) -> void:
+	var x := c.position.x
+	var tw := c.create_tween()
+	for d in [-10.0, 9.0, -6.0, 3.0, 0.0]:
+		tw.tween_property(c, "position:x", x + d, 0.05)
 
 
 ## A card taller than the screen gives the overflow back from its scroll box,
@@ -990,12 +1076,18 @@ func _fit_card(card: Control) -> void:
 	await get_tree().process_frame
 	if not is_instance_valid(card):
 		return
-	var over := card.get_combined_minimum_size().y - (size.y - 16.0)
-	if over <= 0.0:
-		return
-	for sc in card.find_children("*", "ScrollContainer", true, false):
-		sc.custom_minimum_size.y = maxf(120.0, sc.custom_minimum_size.y - over)
-		return
+	var scrolls := card.find_children("*", "ScrollContainer", true, false)
+	if not scrolls.is_empty():
+		var sc: ScrollContainer = scrolls[0]
+		var want: float = sc.get_meta(&"want", sc.custom_minimum_size.y)  # its height before any fitting
+		sc.set_meta(&"want", want)
+		sc.custom_minimum_size.y = want
+		var over := card.get_combined_minimum_size().y - (size.y - 16.0)
+		if over > 0.0:
+			sc.custom_minimum_size.y = maxf(120.0, want - over)
+	# A container never shrinks by itself: snap back to the content and re-centre.
+	card.reset_size()
+	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 
 
 # --- Start of a sitting ------------------------------------------------------
@@ -1027,6 +1119,11 @@ func _show_title() -> void:
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	title.add_child(bg)
+	var gear: Button = %SettingsButton.duplicate(0)  # same look and place as in the game
+	gear.name = "TitleSettings"
+	gear.unique_name_in_owner = false
+	gear.pressed.connect(_show_settings)
+	title.add_child(gear)
 	var col := VBoxContainer.new()
 	col.position = Vector2(64, 60)
 	col.custom_minimum_size = Vector2(380, 0)
@@ -1069,6 +1166,16 @@ func _show_title() -> void:
 		b.pressed.connect(buttons[i][2])
 		col.add_child(b)
 	col.get_child(1).grab_focus()
+	var credit := Label.new()
+	credit.name = "Credit"
+	credit.text = "Created for NASA Space Apps İzmir · by PixelPulsars"
+	credit.theme_type_variation = &"Caption"
+	credit.add_theme_font_size_override(&"font_size", 14)
+	credit.add_theme_constant_override(&"outline_size", 4)
+	credit.add_theme_color_override(&"font_outline_color", Color("#0B1236"))
+	title.add_child(credit)
+	credit.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 12)
+	credit.grow_horizontal = Control.GROW_DIRECTION_BOTH
 
 
 ## Picks the training: each card names its days and the years of the real
@@ -1322,7 +1429,6 @@ func _refresh_stars() -> void:
 func _gain_star() -> void:
 	_refresh_stars()
 	var pill: Control = %StarCounter
-	_bounce(pill)
 	var pop := Label.new()
 	pop.text = "+1 ★"
 	pop.theme_type_variation = &"HudValue"
@@ -1331,11 +1437,19 @@ func _gain_star() -> void:
 	pop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(pop)
 	pop.z_index = 7  # above cards: you see it even while a card is open
-	pop.global_position = pill.global_position + Vector2(pill.size.x / 2.0 - 30.0, pill.size.y)
+	# The star pops up mid-screen, then flies into the counter, which bounces.
+	pop.position = size / 2.0 - Vector2(40, 20)
+	pop.pivot_offset = Vector2(40, 20)
+	pop.scale = Vector2(0.3, 0.3)
 	var t := create_tween()
-	t.tween_property(pop, "position:y", pop.position.y + 26.0, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	t.tween_interval(0.7)
-	t.tween_property(pop, "modulate:a", 0.0, 0.4)
+	t.tween_property(pop, "scale", Vector2(1.6, 1.6), 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_interval(0.25)
+	t.set_parallel()
+	t.tween_property(pop, "global_position", pill.global_position + Vector2(pill.size.x / 2.0 - 40.0, 0), 0.45) \
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	t.tween_property(pop, "scale", Vector2(0.6, 0.6), 0.45)
+	t.chain().tween_callback(func() -> void: _bounce(pill))
+	t.tween_property(pop, "modulate:a", 0.0, 0.15)
 	t.tween_callback(pop.queue_free)
 
 ## Mission Log: one page per finished day (photo, real event, the day's idea,
@@ -1381,11 +1495,34 @@ func _show_log() -> void:
 
 ## Settings: things that really work today (sound settings belong to the
 ## audio side and come later).
+## Sound on/off lives in its own file, so a new mission never resets it.
+const SETTINGS_PATH := "user://settings.cfg"
+const SOUND_BUSES := {&"Music": "Music", &"SFX": "Sound FX"}
+
+
+func _sound_on(bus: StringName) -> bool:
+	var cfg := ConfigFile.new()
+	cfg.load(SETTINGS_PATH)  # missing file = everything on
+	return cfg.get_value("sound", bus, true)
+
+
+func _set_sound(bus: StringName, on: bool, save := true) -> void:
+	var i := AudioServer.get_bus_index(bus)
+	if i >= 0:
+		AudioServer.set_bus_mute(i, not on)
+	if save:
+		var cfg := ConfigFile.new()
+		cfg.load(SETTINGS_PATH)
+		cfg.set_value("sound", bus, on)
+		cfg.save(SETTINGS_PATH)
+
+
 func _show_settings() -> void:
-	_modal("Settings", "", "Watch the tutorial again, or start a new mission.", [
+	var m := _modal("Settings", "", "Watch the tutorial again, or start a new mission.", [
 		["Tutorial", func() -> void:
 			Colony.tutorial_done = false
-			_tutorial_step(0)],
+			if not has_node("TitleScreen"):  # on the title it plays after the start
+				_tutorial_step(0)],
 		["New mission", func() -> void:
 			_modal("Start a new mission?", "mascot_think", "Your base and stars from this mission will be cleared.", [
 				["Yes, start over", func() -> void:
@@ -1394,6 +1531,39 @@ func _show_settings() -> void:
 					get_tree().reload_current_scene()],
 				["No, keep playing", func() -> void: pass]])],
 		["Close", func() -> void: pass]])
+	# On top: Music / Sound FX switches, then a divider, then the rest.
+	var body: Label = m.find_child("Body", true, false)
+	var col: VBoxContainer = body.get_parent()
+	var at := body.get_index()
+	for bus in SOUND_BUSES:
+		var row := HBoxContainer.new()
+		var name_label := Label.new()
+		name_label.text = SOUND_BUSES[bus]
+		name_label.add_theme_font_size_override(&"font_size", 22)
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(name_label)
+		var sw := Button.new()  # a big ON / OFF switch: gold when on, grey when off
+		sw.name = "%sSwitch" % bus
+		sw.toggle_mode = true
+		sw.custom_minimum_size = Vector2(110, 52)
+		var show := func(on: bool) -> void:
+			sw.text = "ON" if on else "OFF"
+			sw.theme_type_variation = &"PrimaryButton" if on else &"Button"
+			sw.modulate = Color.WHITE if on else Color(0.7, 0.7, 0.75)
+		sw.button_pressed = _sound_on(bus)
+		show.call(sw.button_pressed)
+		sw.toggled.connect(func(on: bool) -> void:
+			show.call(on)
+			_bounce(sw)
+			_set_sound(bus, on))
+		row.add_child(sw)
+		col.add_child(row)
+		col.move_child(row, at)
+		at += 1
+	var line := HSeparator.new()
+	line.add_theme_constant_override(&"separation", 16)
+	col.add_child(line)
+	col.move_child(line, at)
 
 
 ## Badge shelf: each badge with its symbol; earned ones bright with ✓, the
@@ -1466,6 +1636,7 @@ func _show_rewards() -> void:
 	for r in _new_rewards:
 		if r[0] == "decor":
 			decor.append("New decoration: %s! Find it in Build. It's free." % INFO[r[1]].name)
+	_celebrate(2)
 	var m := _modal("Today's rewards!", "mascot_celebrate", "\n".join(decor), [["Yay!", func() -> void: pass]])
 	var body: Label = m.find_child("Body", true, false)
 	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -1539,6 +1710,26 @@ func _show_story(task := {}, review := false) -> void:
 	body.add_theme_font_size_override(&"font_size", 22)
 	body.add_theme_color_override(&"font_color", Color("#FFC94A"))
 	var col: VBoxContainer = body.get_parent()
+	var card: Control = col.get_parent()
+	# Ribbon: a "DAY n" chip beside the mission's real name.
+	var ribbon := HBoxContainer.new()
+	ribbon.alignment = BoxContainer.ALIGNMENT_CENTER
+	ribbon.add_theme_constant_override(&"separation", 12)
+	col.add_child(ribbon)
+	col.move_child(ribbon, body.get_index())
+	for d in range(1, OutpostSimulation.campaign_length(Colony.state) + 1):
+		if OutpostSimulation.tasks_for(d, Colony.state.campaign)[0].id == task.id:
+			var chip := PanelContainer.new()
+			chip.name = "DayChip"
+			chip.theme_type_variation = &"ChipWarning"
+			var dl := Label.new()
+			dl.theme_type_variation = &"ChipLabel"
+			dl.text = "DAY %d" % d
+			chip.add_child(dl)
+			ribbon.add_child(chip)
+	body.reparent(ribbon)
+	body.custom_minimum_size.x = 0
+	body.autowrap_mode = TextServer.AUTOWRAP_OFF
 	var scroll := ScrollContainer.new()
 	scroll.name = "StoryScroll"
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -1559,21 +1750,21 @@ func _show_story(task := {}, review := false) -> void:
 	var text_col := VBoxContainer.new()
 	text_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(text_col)
-	_info_label(text_col, "A real problem NASA faced. " + story.where, 15)
-	if story.note != "":
-		_info_label(text_col, story.note, 15)
-	_info_label(text_col, "The problem: " + story.problem, 17)
-	for l in text_col.get_children():
+	_info_label(text_col, story.where + (" · " + story.note if story.note != "" else ""), 14)
+	text_col.get_child(-1).modulate.a = 0.7  # the where/when is a quiet caption
+	_rich_label(text_col, "==The problem:== " + story.problem, 18)
+	for l in text_col.get_children():  # beside the photo they get narrower
 		l.custom_minimum_size.x = 320 if photo_col.get_child_count() > 0 else 530
 
 	var reveal := VBoxContainer.new()
 	reveal.name = "Reveal"
 	reveal.add_theme_constant_override(&"separation", 6)
-	_info_label(reveal, "What NASA did: " + story.did, 17)
+	_rich_label(reveal, "==What NASA did:== " + story.did, 17)
 	var pic_row: Dictionary = NasaDb.mission_image(task.id).get("row", {})
 	if not pic_row.is_empty():
 		_info_label(reveal, "About the photo: " + pic_row.relevance, 13)
 		reveal.get_child(-1).name = "PhotoNote"
+		reveal.get_child(-1).modulate.a = 0.7
 	_info_label(reveal, ("You did it: " if review else "Your turn: ") + task.text + ".", 18, true)
 	_nasa_link(reveal, "Read more at NASA", story.url)
 	_info_label(reveal, "This story is real. In MoonMinds, the base, its numbers and Robo are made up.", 13)
@@ -1590,14 +1781,36 @@ func _show_story(task := {}, review := false) -> void:
 	var open_up := func() -> void:
 		reveal.visible = true
 		actions.visible = true
-		_fit_card.call_deferred(col.get_parent())
-		scroll.ensure_control_visible.call_deferred(reveal)
+		_fit_card.call_deferred(card)
+		get_tree().create_timer(0.15).timeout.connect(func() -> void:  # after the card is re-fitted
+			if is_instance_valid(reveal):
+				scroll.scroll_vertical = int(reveal.position.y))  # start at "What NASA did"
 	if review or Colony.state.guesses.get(task.id, {}).get("solved", false):
 		quiz.visible = false
 		return
 	reveal.visible = false
 	actions.visible = false  # the answer comes first; it can't get stuck (2 tries max)
-	_info_label(quiz, task.quiz.question, 18, true)
+	var ask := PanelContainer.new()
+	ask.name = "AskBubble"
+	ask.theme_type_variation = &"InfoBubble"
+	quiz.add_child(ask)
+	var ask_row := HBoxContainer.new()
+	ask_row.add_theme_constant_override(&"separation", 10)
+	ask.add_child(ask_row)
+	var robo := TextureRect.new()
+	robo.texture = load(ART % "mascot_think")
+	robo.custom_minimum_size = Vector2(54, 54)
+	robo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	robo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	ask_row.add_child(robo)
+	var q := Label.new()
+	q.theme_type_variation = &"DarkBody"
+	q.text = task.quiz.question
+	q.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	q.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	q.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	q.add_theme_font_size_override(&"font_size", 18)
+	ask_row.add_child(q)
 	# Feedback sits right under the question, so a hint is never scrolled away.
 	var feedback := Label.new()
 	feedback.name = "QuizFeedback"
@@ -1605,6 +1818,7 @@ func _show_story(task := {}, review := false) -> void:
 	feedback.custom_minimum_size = Vector2(530, 0)
 	feedback.add_theme_font_size_override(&"font_size", 16)
 	feedback.add_theme_color_override(&"font_color", Color("#FFC94A"))
+	feedback.hide()  # no empty gap before the first answer
 	quiz.add_child(feedback)
 	for i in task.quiz.options.size():
 		var opt: Dictionary = task.quiz.options[i]
@@ -1612,25 +1826,43 @@ func _show_story(task := {}, review := false) -> void:
 		b.name = "Option%d" % i
 		b.text = opt.text
 		b.theme_type_variation = &"IconButton"
-		b.custom_minimum_size = Vector2(530, 48)
+		b.custom_minimum_size = Vector2(530, 54)
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		b.add_theme_font_size_override(&"font_size", 16)
+		b.add_theme_font_size_override(&"font_size", 17)
+		var letter := Label.new()  # A / B / C on the left, like a quiz show
+		letter.theme_type_variation = &"ChipLabel"
+		letter.text = "ABC"[i]
+		letter.add_theme_font_size_override(&"font_size", 24)
+		letter.add_theme_color_override(&"font_color", Color("#FFC94A"))
+		b.add_child(letter)
+		letter.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 18)
 		b.pressed.connect(Events.button_pressed.emit.bind(StringName(b.name)))
 		b.pressed.connect(func() -> void:
+			_bounce(b)
+			feedback.show()
+			_fit_card.call_deferred(card)
 			var tries := Colony.record_guess(task.id, opt.correct)
 			if opt.correct:
 				feedback.text = "✓ Yes! That is what NASA did. +1 star"
+				feedback.add_theme_color_override(&"font_color", Color("#7CF29A"))
 			elif tries >= 2:
 				feedback.text = "Good thinking! NASA's answer: %s." % _correct_option(task.quiz)
 			else:
 				feedback.text = "Not quite. %s Try again!" % opt.hint
 				b.disabled = true
+				_shake(card)
 				return
 			for other in quiz.get_children():
 				if other is Button:
 					other.disabled = true
-					if other.text == _correct_option(task.quiz):
-						other.text = "✓ " + other.text  # the answer, marked without colour
+					other.visible = other.text == _correct_option(task.quiz)  # room for NASA's answer
+					if other.visible:
+						other.text = "✓ " + other.text  # the answer, marked without colour alone
+						other.disabled = false  # stays bright gold, but can't be pressed again
+						other.mouse_filter = Control.MOUSE_FILTER_IGNORE
+						other.focus_mode = Control.FOCUS_NONE
+						other.theme_type_variation = &"PrimaryButton"
+						_bounce(other)
 			open_up.call())
 		quiz.add_child(b)
 
@@ -1641,17 +1873,21 @@ func _mission_photo(parent: Control, mission_id: StringName) -> void:
 	var pic := NasaDb.mission_image(mission_id)
 	if pic.is_empty():
 		return
+	var frame := PanelContainer.new()  # a white "polaroid" frame
+	frame.theme_type_variation = &"TagPanel"
+	parent.add_child(frame)
 	var tex := TextureRect.new()
 	tex.name = "MissionPhoto"
 	tex.texture = pic.texture
-	tex.custom_minimum_size = Vector2(200, 140)
+	tex.custom_minimum_size = Vector2(190, 130)
 	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	parent.add_child(tex)
+	tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	frame.add_child(tex)
 	var row: Dictionary = pic.row
 	var kind: String = row.content_type
 	_info_label(parent, "%s · %s · %s" % [kind.left(1).to_upper() + kind.substr(1), row.credit, row.asset_id], 12)
 	parent.get_child(-1).custom_minimum_size.x = 200
+	parent.get_child(-1).modulate.a = 0.7  # credit line: there, but quiet
 
 
 ## A link to a NASA page. Kids get a "ask a grown-up" card before the browser opens.
@@ -1762,6 +1998,31 @@ func _show_data_info() -> void:
 		_nasa_link(list, src.url, src.url)
 	_info_label(list, "Game numbers", 18, true)
 	_info_label(list, DATA_INFO.game_only, 15)
+
+
+## Tiny Markdown for mission texts: **key words** = gold bold, ==label== = bold.
+## One colour only, so the card stays calm. Anything else stays plain text.
+static func md(text: String) -> String:
+	var t := text.replace("[", "[lb]")
+	t = RegEx.create_from_string("\\*\\*(.+?)\\*\\*").sub(t, "[b][color=#FFC94A]$1[/color][/b]", true)
+	return RegEx.create_from_string("==(.+?)==").sub(t, "[b]$1[/b]", true)
+
+
+## A wrapping text line that understands md() (same size and width as _info_label).
+func _rich_label(parent: Control, text: String, px: int) -> void:
+	var l := RichTextLabel.new()
+	l.bbcode_enabled = true
+	l.fit_content = true
+	l.scroll_active = false
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.mouse_filter = Control.MOUSE_FILTER_PASS
+	l.custom_minimum_size = Vector2(530, 0)
+	l.add_theme_font_override(&"normal_font", get_theme_font(&"font", &"Label"))
+	l.add_theme_font_override(&"bold_font", get_theme_font(&"font", &"ChipLabel"))
+	l.add_theme_font_size_override(&"normal_font_size", px)
+	l.add_theme_font_size_override(&"bold_font_size", px)
+	l.text = md(text)
+	parent.add_child(l)
 
 
 func _info_label(parent: Control, text: String, px: int, heading := false) -> void:

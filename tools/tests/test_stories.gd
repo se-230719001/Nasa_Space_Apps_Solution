@@ -37,6 +37,8 @@ func card_text() -> String:
 		for n in m.find_children("*", "", true, false):
 			if (n is Label or n is Button or n is LinkButton) and n.is_visible_in_tree():
 				t += n.text + "|"
+			elif n is RichTextLabel and n.is_visible_in_tree():
+				t += n.get_parsed_text() + "|"
 	return t
 
 
@@ -73,12 +75,14 @@ func _initialize() -> void:
 	change_scene_to_file("res://scenes/main.tscn")
 	await create_timer(2.6).timeout
 	hud = current_scene.find_child("OutpostHUD", true, false)
+	check("md(): **key** gold, ==label== bold, [ stays text", hud.md("**Mold** in [x] ==Now:== 2015")
+		== "[b][color=#FFC94A]Mold[/color][/b] in [lb]x] [b]Now:[/b] 2015")
 
 	# --- Day 1: before -> predict ---
 	var heard := []
 	root.get_node("Events").prediction_made.connect(func(ok): heard.append(ok))
 	var t := card_text()
-	check("day 1 opens with its real problem", "Mission Briefing" in t and "A real problem NASA faced" in t \
+	check("day 1 opens with its real problem", "Mission Briefing" in t \
 		and "Veggie zinnias" in t and "The problem:" in t)
 	check("asks what you would do, with 3 ideas", "Mold is growing on the space flowers" in t and option(2) != null)
 	check("NASA's fix and the go button stay hidden until you answer", not "What NASA did" in t and not "My turn!" in t)

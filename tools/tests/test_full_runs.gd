@@ -40,6 +40,8 @@ func card_text() -> String:
 		for n in card().find_children("*", "", true, false):
 			if (n is Label or n is Button) and n.is_visible_in_tree():
 				t += n.text + "|"
+			elif n is RichTextLabel and n.is_visible_in_tree():
+				t += n.get_parsed_text() + "|"
 	return t
 
 

@@ -38,6 +38,8 @@ func card_text() -> String:
 		for n in card().find_children("*", "", true, false):
 			if (n is Label or n is Button) and n.is_visible_in_tree():
 				t += n.text + "|"
+			elif n is RichTextLabel and n.is_visible_in_tree():
+				t += n.get_parsed_text() + "|"
 	return t
 
 
@@ -106,6 +108,17 @@ func scene_flow() -> void:
 	await frames()
 	check("settings: tutorial again / new mission / close", "Settings" in card_text() and "Tutorial" in card_text() and "New mission" in card_text())
 	check("the robot steps aside while a card is open", not hud.get_node("%Helper").visible)
+	var music: Button = card().find_child("MusicSwitch", true, false)
+	var sfx: Button = card().find_child("SFXSwitch", true, false)
+	check("settings: Music and Sound FX switches on top, then a divider", music != null and sfx != null
+		and card().find_children("*", "HSeparator", true, false).size() == 1)
+	sfx.button_pressed = false
+	var cfg := ConfigFile.new()
+	cfg.load(hud.SETTINGS_PATH)
+	check("Sound FX off mutes the SFX bus and is remembered", AudioServer.is_bus_mute(AudioServer.get_bus_index(&"SFX"))
+		and cfg.get_value("sound", &"SFX", true) == false and not AudioServer.is_bus_mute(AudioServer.get_bus_index(&"Music")))
+	sfx.button_pressed = true  # leave it on for the player
+	check("and back on", not AudioServer.is_bus_mute(AudioServer.get_bus_index(&"SFX")))
 	card().find_child("Choice2", true, false).pressed.emit()  # Close
 	await frames(3)
 	check("and comes back when it closes", hud.get_node("%Helper").visible)
@@ -114,6 +127,9 @@ func scene_flow() -> void:
 	colony.research(&"rover_blueprint")
 	await frames()
 	check("finishing the mission is a star", R.stars_for(colony.state, &"rover_blueprint") == 1)
+	check("finishing a mission is celebrated: flash + confetti, taps still pass", hud.has_node("Flash")
+		and hud.get_children().filter(func(n): return n is CPUParticles2D).size() == 2
+		and hud.get_node("Flash").mouse_filter == Control.MOUSE_FILTER_IGNORE)
 	check("counter goes up with a '+1 ★' pop", counter.text == "★ 1  Science star"
 		and hud.get_children().any(func(n): return n is Label and n.text == "+1 ★"))
 	await create_timer(colony.AUTO_NEXT_DELAY + 0.9).timeout
