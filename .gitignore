@@ -30,3 +30,19 @@ __pycache__/
 /slideshow/output/*.pdf
 /slideshow/output/Fredoka-Semibold.ttf
 /slideshow/output/Fredoka-Semibold.ttf.import
+
+# Development-only material; final repository contains the playable source
+/*.md
+/export_presets.cfg
+/tools/
+/addons/godot-git-plugin/
+/slideshow/
+/intro_assets/
+/assets/source/
+/nasa_db/raw/
+/assets/README.md
+/assets/generated/moonminds/README.md
+/assets/generated/moonminds/prompts.json
+/assets/generated/moonminds/validation.json
+/assets/audio/sfx/elevenlabs/*.mp3
+/assets/audio/sfx/elevenlabs/*.mp3.import
