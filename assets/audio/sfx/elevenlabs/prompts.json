@@ -1,0 +1,57 @@
+[
+  {
+    "name": "button_pressed",
+    "duration_seconds": 0.5,
+    "prompt": "Single isolated sound effect for a polished playful lunar colony strategy game for children ages 7 to 12. Friendly toy-like space technology. Clean dry close sound, immediate attack, smooth short decay. No speech, no background ambience, no music bed, no harsh buzz or piercing frequencies. One tiny rounded tactile button tick with a soft rubbery pop and a delicate electronic ping. Extremely brief and understated, suitable for frequent tapping."
+  },
+  {
+    "name": "build_popup_opened",
+    "duration_seconds": 0.6,
+    "prompt": "Single isolated sound effect for a polished playful lunar colony strategy game for children ages 7 to 12. Friendly toy-like space technology. Clean dry close sound, immediate attack, smooth short decay. No speech, no background ambience, no music bed, no harsh buzz or piercing frequencies. A small holographic blueprint unfolds: a soft airy flick followed by two light glassy ascending notes. Curious and inviting."
+  },
+  {
+    "name": "build_cancelled",
+    "duration_seconds": 0.5,
+    "prompt": "Single isolated sound effect for a polished playful lunar colony strategy game for children ages 7 to 12. Friendly toy-like space technology. Clean dry close sound, immediate attack, smooth short decay. No speech, no background ambience, no music bed, no harsh buzz or piercing frequencies. A holographic blueprint folds away with a soft suction swoop and one mellow falling wooden digital plop. Neutral, reassuring, no failure buzzer."
+  },
+  {
+    "name": "build_confirmed",
+    "duration_seconds": 1.2,
+    "prompt": "Isolated SFX for a playful lunar colony game, ages 7-12. Friendly toy-like sci-fi. Dry, immediate attack, short decay. No speech, ambience, harsh buzz or music bed. A toy lunar greenhouse module locks into its foundation: two light mechanical clacks, a cushioned magnetic thunk, then a warm crystalline confirmation ping. Compact satisfying construction sound, no explosion."
+  },
+  {
+    "name": "resource_up",
+    "duration_seconds": 0.5,
+    "prompt": "Isolated SFX for a playful lunar colony game, ages 7-12. Friendly toy-like sci-fi. Dry, immediate attack, short decay. No speech, ambience, harsh buzz or music bed. One tiny rounded liquid-electronic bubble rising in pitch, with a faint sparkling finish. Subtle positive telemetry feedback, not a reward fanfare."
+  },
+  {
+    "name": "resource_down",
+    "duration_seconds": 0.5,
+    "prompt": "Isolated SFX for a playful lunar colony game, ages 7-12. Friendly toy-like sci-fi. Dry, immediate attack, short decay. No speech, ambience, harsh buzz or music bed. One tiny muted liquid-electronic bubble gently falling in pitch. Quiet neutral resource expenditure feedback, no alarm and no negative buzzer."
+  },
+  {
+    "name": "mascot_info",
+    "duration_seconds": 0.7,
+    "prompt": "Isolated SFX for a playful lunar colony game, ages 7-12. Friendly toy-like sci-fi. Dry, immediate attack, short decay. No speech, ambience, harsh buzz or music bed. A small friendly robot astronaut makes a curious two-note rounded synth chirrup, like an inquisitive little electronic bird. Nonverbal and warm."
+  },
+  {
+    "name": "mascot_warning",
+    "duration_seconds": 0.8,
+    "prompt": "Isolated SFX for a playful lunar colony game, ages 7-12. Friendly toy-like sci-fi. Dry, immediate attack, short decay. No speech, ambience, harsh buzz or music bed. A helpful little robot astronaut politely requests attention with two soft hollow bell pulses. Mild concern, reassuring and gentle, no siren or emergency alarm."
+  },
+  {
+    "name": "mascot_success",
+    "duration_seconds": 1.0,
+    "prompt": "Isolated SFX for a playful lunar colony game, ages 7-12. Friendly toy-like sci-fi. Dry, immediate attack, short decay. No speech, ambience, harsh buzz or music bed. A happy small robot astronaut gives a playful three-note rising electronic chirrup ending in a tiny warm sparkle. Nonverbal, delighted but restrained."
+  },
+  {
+    "name": "mascot_typed",
+    "duration_seconds": 0.5,
+    "prompt": "Isolated SFX for a playful lunar colony game, ages 7-12. Friendly toy-like sci-fi. Dry, immediate attack, short decay. No speech, ambience, harsh buzz or music bed. One single very short soft rounded electronic mouth pip from a friendly little robot. A tiny muted droplet tick, less than a tenth of a second, then silence. No repeated sequence."
+  },
+  {
+    "name": "mission_complete",
+    "duration_seconds": 2.5,
+    "prompt": "Isolated SFX for a playful lunar colony game, ages 7-12. Friendly toy-like sci-fi. Dry, immediate attack, short decay. No speech, ambience, harsh buzz or music bed. A compact celebratory achievement stinger: three warm ascending marimba-like synth notes, a soft rounded bell resolution and delicate stardust shimmer. Joyful discovery on the Moon, gentle and charming, no drums or orchestral blast."
+  }
+]

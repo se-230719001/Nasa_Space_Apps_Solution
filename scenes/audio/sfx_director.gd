@@ -6,9 +6,16 @@ extends Node
 ## Event key -> sound. Keys match the handlers in _ready(). A missing entry is
 ## silent, so sounds can be added one by one.
 var SOUNDS := {
-	&"mascot_typed": _make_blip(),
-	# &"build_confirmed": preload("res://assets/audio/sfx/building_placement.wav"),
-	# &"button_pressed": preload("res://assets/audio/sfx/ui_click.wav"),
+	&"button_pressed": preload("res://assets/audio/sfx/elevenlabs/button_pressed.ogg"),
+	&"build_popup_opened": preload("res://assets/audio/sfx/elevenlabs/build_popup_opened.ogg"),
+	&"build_cancelled": preload("res://assets/audio/sfx/elevenlabs/build_cancelled.ogg"),
+	&"build_confirmed": preload("res://assets/audio/sfx/elevenlabs/build_confirmed.ogg"),
+	&"resource_up": preload("res://assets/audio/sfx/elevenlabs/resource_up.ogg"),
+	&"resource_down": preload("res://assets/audio/sfx/elevenlabs/resource_down.ogg"),
+	&"mascot_info": preload("res://assets/audio/sfx/elevenlabs/mascot_info.ogg"),
+	&"mascot_warning": preload("res://assets/audio/sfx/elevenlabs/mascot_warning.ogg"),
+	&"mascot_success": preload("res://assets/audio/sfx/elevenlabs/mascot_success.ogg"),
+	&"mascot_typed": preload("res://assets/audio/sfx/elevenlabs/mascot_typed.ogg"),
 }
 const POOL_SIZE := 6
 
@@ -43,19 +50,3 @@ func play(key: StringName, volume_db := 0.0, pitch := 1.0) -> void:
 	p.volume_db = volume_db
 	p.pitch_scale = pitch
 	p.play()
-
-
-## Short square-wave "blip" for the mascot typewriter, built in code.
-static func _make_blip() -> AudioStreamWAV:
-	var rate := 22050
-	var data := PackedByteArray()
-	var n := int(rate * 0.035)
-	for i in n:
-		var env := 1.0 - float(i) / n
-		var v := (1.0 if fmod(i * 880.0 / rate, 1.0) < 0.5 else -1.0) * env * 0.5
-		data.append(int(v * 127.0) & 0xFF)
-	var wav := AudioStreamWAV.new()
-	wav.format = AudioStreamWAV.FORMAT_8_BITS
-	wav.mix_rate = rate
-	wav.data = data
-	return wav

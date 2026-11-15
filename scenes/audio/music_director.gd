@@ -8,7 +8,7 @@ const TRACKS := {
 	&"explore": preload("res://assets/audio/music/explore_theme.mp3"),
 }
 const STINGERS := {
-	&"mission_complete": preload("res://assets/audio/sfx/mission_complete.wav"),
+	&"mission_complete": preload("res://assets/audio/sfx/elevenlabs/mission_complete.ogg"),
 }
 const FADE_TIME := 1.5
 const SILENT_DB := -40.0
