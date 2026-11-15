@@ -4,3 +4,6 @@
 
 # macOS
 .DS_Store
+
+# NASA raw datasets are large; re-download with tools/nasa/build_nasa_db.py (sha256 in nasa_db/manifest.csv)
+nasa_db/raw/datasets/*.IMG
