@@ -33,6 +33,7 @@ __pycache__/
 
 # Development-only material; final repository contains the playable source
 /*.md
+!/README.md
 /export_presets.cfg
 /tools/
 /addons/godot-git-plugin/
