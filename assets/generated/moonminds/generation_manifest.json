@@ -1,0 +1,123 @@
+{
+  "tool": "built-in image_gen",
+  "source_prompt": "asset_prompts.md",
+  "count": 29,
+  "assets": [
+    {
+      "filename": "mascot_wave.png",
+      "path": "assets/generated/moonminds/mascot_wave.png"
+    },
+    {
+      "filename": "mascot_think.png",
+      "path": "assets/generated/moonminds/mascot_think.png"
+    },
+    {
+      "filename": "mascot_celebrate.png",
+      "path": "assets/generated/moonminds/mascot_celebrate.png"
+    },
+    {
+      "filename": "icon_health.png",
+      "path": "assets/generated/moonminds/icon_health.png"
+    },
+    {
+      "filename": "icon_food.png",
+      "path": "assets/generated/moonminds/icon_food.png"
+    },
+    {
+      "filename": "icon_water.png",
+      "path": "assets/generated/moonminds/icon_water.png"
+    },
+    {
+      "filename": "icon_energy.png",
+      "path": "assets/generated/moonminds/icon_energy.png"
+    },
+    {
+      "filename": "icon_oxygen.png",
+      "path": "assets/generated/moonminds/icon_oxygen.png"
+    },
+    {
+      "filename": "icon_clock.png",
+      "path": "assets/generated/moonminds/icon_clock.png"
+    },
+    {
+      "filename": "icon_settings.png",
+      "path": "assets/generated/moonminds/icon_settings.png"
+    },
+    {
+      "filename": "icon_checklist.png",
+      "path": "assets/generated/moonminds/icon_checklist.png"
+    },
+    {
+      "filename": "icon_search.png",
+      "path": "assets/generated/moonminds/icon_search.png"
+    },
+    {
+      "filename": "icon_explore.png",
+      "path": "assets/generated/moonminds/icon_explore.png"
+    },
+    {
+      "filename": "icon_build.png",
+      "path": "assets/generated/moonminds/icon_build.png"
+    },
+    {
+      "filename": "icon_add.png",
+      "path": "assets/generated/moonminds/icon_add.png"
+    },
+    {
+      "filename": "icon_remove.png",
+      "path": "assets/generated/moonminds/icon_remove.png"
+    },
+    {
+      "filename": "icon_info.png",
+      "path": "assets/generated/moonminds/icon_info.png"
+    },
+    {
+      "filename": "icon_warning.png",
+      "path": "assets/generated/moonminds/icon_warning.png"
+    },
+    {
+      "filename": "icon_critical.png",
+      "path": "assets/generated/moonminds/icon_critical.png"
+    },
+    {
+      "filename": "icon_check.png",
+      "path": "assets/generated/moonminds/icon_check.png"
+    },
+    {
+      "filename": "icon_box.png",
+      "path": "assets/generated/moonminds/icon_box.png"
+    },
+    {
+      "filename": "icon_close.png",
+      "path": "assets/generated/moonminds/icon_close.png"
+    },
+    {
+      "filename": "building_greenhouse.png",
+      "path": "assets/generated/moonminds/building_greenhouse.png"
+    },
+    {
+      "filename": "building_habitat.png",
+      "path": "assets/generated/moonminds/building_habitat.png"
+    },
+    {
+      "filename": "building_main_base.png",
+      "path": "assets/generated/moonminds/building_main_base.png"
+    },
+    {
+      "filename": "building_research_lab.png",
+      "path": "assets/generated/moonminds/building_research_lab.png"
+    },
+    {
+      "filename": "building_solar_panel.png",
+      "path": "assets/generated/moonminds/building_solar_panel.png"
+    },
+    {
+      "filename": "building_water_system.png",
+      "path": "assets/generated/moonminds/building_water_system.png"
+    },
+    {
+      "filename": "logo_moonminds.png",
+      "path": "assets/generated/moonminds/logo_moonminds.png"
+    }
+  ]
+}
