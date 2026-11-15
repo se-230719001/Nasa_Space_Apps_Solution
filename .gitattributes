@@ -1,2 +1,5 @@
 # Normalize EOL for all files that Git considers text files.
 * text=auto eol=lf
+
+# NASA source files must stay byte-for-byte as served (sha256 in nasa_db/manifest.csv).
+nasa_db/** -text
