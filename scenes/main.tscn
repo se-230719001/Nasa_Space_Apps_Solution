@@ -13,6 +13,7 @@
 [ext_resource type="Script" uid="uid://dyj8iixsxvx7f" path="res://scenes/buildings/water_tank.gd" id="water"]
 [ext_resource type="Shader" path="res://scenes/environment/vignette.gdshader" id="vignette_shader"]
 [ext_resource type="Script" path="res://scenes/camera_rig.gd" id="camera_rig"]
+[ext_resource type="Script" path="res://scenes/buildings/colony_dome.gd" id="colony_dome"]
 
 [sub_resource type="ShaderMaterial" id="sky_mat"]
 shader = ExtResource("sky_shader")
@@ -139,6 +140,9 @@ script = ExtResource("solar")
 [node name="WaterTank" type="Node3D" parent="World" unique_id=713608171]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 1.5)
 script = ExtResource("water")
+
+[node name="ColonyDome" type="Node3D" parent="World"]
+script = ExtResource("colony_dome")
 
 [node name="PlacementTile" type="MeshInstance3D" parent="World" unique_id=1309374935]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.04, 3.5)

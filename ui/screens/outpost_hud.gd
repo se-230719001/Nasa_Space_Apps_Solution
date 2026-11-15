@@ -1,41 +1,62 @@
 extends Control
 ## Outpost (Base) HUD laid around the 3D colony so the centre stays clear:
-##   top-left   static mission clock        top edge  fixed resource pills
-##   top-right  settings                    right     slide-in checklist
-##   bottom-left astronaut helper           bottom-right Search / Explore / Build
-## Demo flow: BUILD -> "Build Greenhouse?" card -> confirm -> bars animate, the
-## health gauge, checklist and astronaut react (Observation -> Cause -> Next action).
-
-signal build_confirmed(module_id: StringName)
+##   top-left   mission day + sunlight     top edge  resource pills
+##   top-right  settings                   right     slide-in checklist
+##   bottom-left astronaut helper          bottom-right Search / Explore / Build
+## Shows the Colony simulation; never computes game numbers itself. Build,
+## Search and Explore share one action card: pick an option, read its cost and
+## tomorrow's forecast, confirm. Search/Explore end the day; Build does not.
 
 const CHECK := preload("res://assets/generated/moonminds/icon_check.png")
 const BOX := preload("res://assets/generated/moonminds/icon_box.png")
+const ART := "res://assets/generated/moonminds/%s.png"
 
-## Greenhouse effect on resources, in percentage points.
-const GREENHOUSE_DELTA := {&"power": -30.0, &"water": -20.0, &"food": 30.0}
 ## Health gauge wording per status (colour is never the only signal).
 const HEALTH_TEXT := {
 	ResourceBar.Status.HEALTHY: "Good",
 	ResourceBar.Status.WARNING: "OK",
 	ResourceBar.Status.CRITICAL: "Low",
 }
-## Example checklist content. `id` lets game events tick a task off.
+## The learning path from GAME_ARCHITECTURE.md, one new idea per step.
 const TASKS := [
-	{"id": &"greenhouse", "text": "Build your first Greenhouse"},
-	{"id": &"energy", "text": "Upgrade the Energy Center"},
-	{"id": &"oxygen", "text": "Check the colony's oxygen"},
-	{"id": &"explore", "text": "Prepare the first exploration"},
+	{"id": &"greenhouse", "text": "Build a Greenhouse"},
+	{"id": &"rover_blueprint", "text": "Search: Rover Blueprint"},
+	{"id": &"rover", "text": "Build the Rover"},
+	{"id": &"explore", "text": "Explore with the Rover"},
 ]
+const RESOURCES := [&"power", &"water", &"food", &"oxygen"]
+const RESOURCE_NAMES := {&"power": "Energy", &"water": "Water", &"food": "Food", &"oxygen": "Oxygen"}
+const RESOURCE_ICONS := {&"power": "icon_energy", &"water": "icon_water", &"food": "icon_food", &"oxygen": "icon_oxygen"}
+## Player-facing text for every option. `art` is a generated asset name.
+## shortcut: shield reuses the health icon, no dedicated art yet.
+const INFO := {
+	&"greenhouse": {"name": "Greenhouse", "art": "building_greenhouse", "text": "Grows food and oxygen. Needs light, water and power."},
+	&"shield": {"name": "Shield", "art": "icon_health", "text": "Blocks some radiation to keep the crew healthy. Uses power."},
+	&"rover": {"name": "Rover", "art": "icon_explore", "text": "Drives out to collect science samples."},
+	&"solar": {"name": "Solar", "art": "building_solar_panel", "text": "Turns sunlight into power. Less sun, less power."},
+	&"water_tank": {"name": "Recycler", "art": "building_water_system", "text": "Gets back part of the water the crew uses. Needs power."},
+	&"habitat": {"name": "Habitat", "art": "building_habitat", "text": "The crew's home. Upgrades need less power every day."},
+	&"rover_blueprint": {"name": "Rover Plan", "art": "building_research_lab", "text": "Study your sample to design a rover."},
+	&"radiation_map": {"name": "Radiation Map", "art": "building_research_lab", "text": "Map the radiation. Unlocks the shield and brings 8 kits."},
+	&"emergency": {"name": "Cargo", "art": "icon_critical", "text": "One-time Mission Control supply drop for emergencies."},
+	&"explore": {"name": "Field Trip", "art": "icon_explore", "text": "The rover drives out and brings back science samples."},
+}
+const MENUS := {
+	&"build": [&"greenhouse", &"shield", &"rover", &"solar", &"water_tank", &"habitat"],
+	&"search": [&"rover_blueprint", &"radiation_map", &"emergency"],
+	&"explore": [&"explore"],
+}
 
 const MARGIN := 24.0
 const TOP := 16.0
 const SLIDE_TIME := 0.32
 
-var _greenhouse_built := false
 var _checklist_open := false
 var _done := {}
 var _task_rows := {}
 var _checklist_tween: Tween
+var _mode: StringName = &""
+var _selected: StringName = &""
 
 @onready var _bars := {
 	&"power": %Power as ResourceBar,
@@ -49,25 +70,22 @@ var _checklist_tween: Tween
 
 
 func _ready() -> void:
-	%BuildButton.pressed.connect(_open_build_popup)
-	%BuildButton.pressed.connect(Events.screen_changed.emit.bind(&"outpost"))
-	%SearchButton.pressed.connect(_say.bind(&"info", "", "The research lab is coming soon. Build a greenhouse first!"))
-	%SearchButton.pressed.connect(Events.screen_changed.emit.bind(&"outpost"))
-	%ExploreButton.pressed.connect(_say.bind(&"info", "", "Exploring needs a rover. Let's grow food for the crew first!"))
+	%BuildButton.pressed.connect(_open_menu.bind(&"build"))
+	%SearchButton.pressed.connect(_open_menu.bind(&"search"))
+	%ExploreButton.pressed.connect(_open_menu.bind(&"explore"))
 	%ExploreButton.pressed.connect(Events.screen_changed.emit.bind(&"explore"))
 	for button in find_children("*", "BaseButton", true, false):
 		button.pressed.connect(Events.button_pressed.emit.bind(StringName(button.name)))
 	%SettingsButton.pressed.connect(_say.bind(&"info", "", "Settings will live here."))
-	%CloseButton.pressed.connect(_close_build_popup)
-	%CancelButton.pressed.connect(_close_build_popup)
-	%ConfirmButton.pressed.connect(_confirm_build)
+	%CloseButton.pressed.connect(_close_menu)
+	%CancelButton.pressed.connect(_close_menu)
+	%ConfirmButton.pressed.connect(_confirm)
 	%ChecklistTab.pressed.connect(toggle_checklist)
 	resized.connect(_place_drawers.bind(false))
 	_checklist_drawer.resized.connect(_place_drawers.bind(false))
+	Colony.day_finished.connect(_on_day_finished)
 
-	for key in _bars:
-		_bars[key].status = _status_for(_bars[key].value)
-	_update_health()
+	_sync(false)
 	_build_checklist()
 	_place_drawers.call_deferred(false)
 	_play_splash()
@@ -75,7 +93,7 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _popup.visible and event.is_action_pressed(&"ui_cancel"):
-		_close_build_popup()
+		_close_menu()
 		get_viewport().set_input_as_handled()
 
 
@@ -87,6 +105,238 @@ func _play_splash() -> void:
 	tween.tween_property(splash, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(splash.hide)
 	tween.tween_callback(%BuildButton.grab_focus)
+
+
+# --- Simulation -> HUD -------------------------------------------------------
+
+## Pushes the current Colony state into the pills, health gauge and day card.
+func _sync(animate := true) -> void:
+	var state: Dictionary = Colony.state
+	for key in RESOURCES:
+		var v := float(state.stores[key])
+		if animate:
+			_bars[key].animate_to(v, _status_for(v))
+		else:
+			_bars[key].value = v
+			_bars[key].status = _status_for(v)
+	var health := float(state.crew_health)
+	var status := _status_for(health)
+	_health.display_text = HEALTH_TEXT[status]
+	if animate:
+		_health.animate_to(health, status)
+	else:
+		_health.value = health
+		_health.status = status
+	%TimeDisplay.show_day(int(state.day), Colony.sun_word())
+
+
+## End of a mission day: animate every change, then explain it
+## (observation -> cause -> next step, GAME_ARCHITECTURE.md).
+func _on_day_finished(report: Dictionary, before: Dictionary) -> void:
+	_sync()
+	for key in RESOURCES:
+		var delta := roundf(float(report.stores[key]) - float(before[key]))
+		if delta != 0.0:
+			_show_delta(_bars[key], delta)
+			Events.resource_changed.emit(key, delta)
+	if float(report.health_loss) > 0.0:
+		_show_delta(_health, -float(report.health_loss))
+	_explain_day(report)
+
+
+func _explain_day(report: Dictionary) -> void:
+	var short := []
+	for key in report.unmet_crew_needs:
+		if float(report.unmet_crew_needs[key]) > 0.0:
+			short.append(RESOURCE_NAMES[key].to_lower())
+	if not short.is_empty():
+		_say(&"warning", "Not enough %s!" % " and ".join(short),
+			"The crew ran short and got weaker. Build or upgrade something that makes %s." % short[0])
+	elif float(report.health_loss) > 0.0:
+		_say(&"warning", "Radiation!", "Space radiation hurt the crew a little. A shield would protect them.")
+	elif float(report.generated_power) < 12.0:
+		_say(&"info", "Low sun today", "Solar panels only made %d power. Machines slow down when power is low." % roundi(report.generated_power))
+	else:
+		var extra := ""
+		if float(report.food_made) > 0.0:
+			extra = " The greenhouse grew %d food." % roundi(report.food_made)
+		_say(&"success", "Day %d done!" % (int(report.day) - 1), "Solar panels made %d power.%s" % [roundi(report.generated_power), extra])
+
+
+# --- Action card -------------------------------------------------------------
+
+func _open_menu(mode: StringName) -> void:
+	_mode = mode
+	_selected = &""
+	for child in %Options.get_children():
+		child.free()
+	var group := ButtonGroup.new()
+	var first: StringName = &""
+	for id in MENUS[mode]:
+		var b := Button.new()
+		b.name = String(id)
+		b.text = INFO[id].name
+		b.toggle_mode = true
+		b.button_group = group
+		b.custom_minimum_size = Vector2(0, 44)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.theme_type_variation = &"IconButton"
+		b.add_theme_font_size_override(&"font_size", 16)
+		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		b.pressed.connect(_select.bind(id))
+		%Options.add_child(b)
+		# Open on the first option the player can actually take.
+		if first == &"" and bool(_preview(id).allowed):
+			first = id
+	if first == &"":
+		first = MENUS[mode][0]
+	%Options.get_node(String(first)).button_pressed = true
+	%Options.visible = MENUS[mode].size() > 1
+	%Title.text = {&"build": "Build", &"search": "Search", &"explore": "Explore"}[mode]
+	_select(first)
+	_popup.visible = true
+	Events.build_popup_opened.emit(_selected)
+	_popup.modulate.a = 0.0
+	create_tween().tween_property(_popup, "modulate:a", 1.0, 0.2)
+	%ConfirmButton.grab_focus()
+
+
+func _close_menu(cancelled := true) -> void:
+	if cancelled and _popup.visible:
+		Events.build_cancelled.emit(_selected)
+	if _mode == &"explore":
+		Events.screen_changed.emit(&"outpost")
+	_popup.visible = false
+	%BuildButton.grab_focus()
+
+
+func _preview(id: StringName) -> Dictionary:
+	match _mode:
+		&"build":
+			return Colony.preview_build(id)
+		&"search":
+			return Colony.preview_emergency() if id == &"emergency" else Colony.preview_research(id)
+		_:
+			return Colony.preview_explore()
+
+
+## Fills the card for one option: art, cost, what tomorrow looks like.
+func _select(id: StringName) -> void:
+	_selected = id
+	var info: Dictionary = INFO[id]
+	var p := _preview(id)
+	%Illustration.texture = load(ART % info.art)
+	%Explanation.text = info.text
+	for child in %Rows.get_children():
+		child.free()
+	var confirm: Button = %ConfirmButton
+	confirm.disabled = not p.allowed
+	if not p.allowed:
+		_row("icon_critical", p.reason)
+		confirm.text = "Locked"
+		return
+	match _mode:
+		&"build":
+			var upgrading := String(p.action) == "upgrade"
+			confirm.text = "Upgrade" if upgrading else "Build"
+			if upgrading:
+				_row("icon_add", "Level %d → %d" % [p.from_level, p.next_level])
+			_row("icon_build", "%d build kits (you have %d)" % [p.cost_kits, Colony.state.kits])
+		&"search":
+			if id == &"emergency":
+				confirm.text = "Call"
+				_row("icon_add", "Adds supplies to every bar")
+			else:
+				confirm.text = "Research"
+				_row("icon_search", "Uses %d sample + %d energy" % [p.science_cost, p.power_cost])
+			_row("icon_clock", "Takes the rest of the day")
+		&"explore":
+			confirm.text = "Go!"
+			var costs := []
+			for key in p.cost:
+				costs.append("%d %s" % [p.cost[key], RESOURCE_NAMES[key].to_lower()])
+			_row("icon_explore", "Uses " + ", ".join(costs))
+			_row("icon_search", "Finds %d science sample%s" % [p.science, "" if int(p.science) == 1 else "s"])
+			_row("icon_clock", "Takes the rest of the day")
+	_forecast_row(p.forecast)
+
+
+## "Tomorrow" line: one small icon+number per resource that will change.
+func _forecast_row(forecast: Dictionary) -> void:
+	var line := HBoxContainer.new()
+	line.add_theme_constant_override(&"separation", 6)
+	var label := Label.new()
+	label.text = "Tomorrow:"
+	label.theme_type_variation = &"DarkCaption"
+	line.add_child(label)
+	for key in RESOURCES:
+		var change := roundi(float(forecast.next_day_store_change[key]))
+		if change != 0:
+			_signed(line, RESOURCE_ICONS[key], change)
+	var health := roundi(float(forecast.health_change))
+	if health != 0:
+		_signed(line, "icon_health", health)
+	%Rows.add_child(line)
+
+
+func _signed(line: Control, icon: String, value: int) -> void:
+	line.add_child(_icon(icon, 22))
+	var v := Label.new()
+	v.text = "%+d" % value
+	v.theme_type_variation = &"DarkCaption"
+	v.add_theme_color_override(&"font_color", Color("#1E9E3A") if value > 0 else Color("#D6334A"))
+	line.add_child(v)
+
+
+func _row(icon: String, text: String) -> void:
+	var line := HBoxContainer.new()
+	line.add_theme_constant_override(&"separation", 8)
+	line.add_child(_icon(icon, 24))
+	var label := Label.new()
+	label.text = text
+	label.theme_type_variation = &"DarkCaption"
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	line.add_child(label)
+	%Rows.add_child(line)
+
+
+func _icon(art: String, px: int) -> TextureRect:
+	var r := TextureRect.new()
+	r.texture = load(ART % art)
+	r.custom_minimum_size = Vector2(px, px)
+	r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	r.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	r.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return r
+
+
+func _confirm() -> void:
+	var id := _selected
+	var mode := _mode
+	_close_menu(false)
+	var result: Dictionary
+	match mode:
+		&"build":
+			result = Colony.build(id)
+			if result.ok:
+				Events.build_confirmed.emit(id)
+				complete_task(id)
+				var level := int(Colony.state.levels[id])
+				_say(&"success", "%s %s!" % [INFO[id].name, "built" if level == 1 else "upgraded to level %d" % level],
+					"It starts working tomorrow. %s" % INFO[id].text)
+		&"search":
+			result = Colony.emergency_supply() if id == &"emergency" else Colony.research(id)
+			if result.ok:
+				complete_task(id)
+		&"explore":
+			result = Colony.explore()
+			if result.ok:
+				complete_task(&"explore")
+				_say(&"success", "Samples found!", "The rover brought back %d science sample%s. Use them in Search." \
+					% [result.science_found, "" if int(result.science_found) == 1 else "s"])
+	if not result.ok:
+		_say(&"warning", "Not yet", result.reason)
 
 
 # --- Drawers ---------------------------------------------------------------
@@ -146,7 +396,7 @@ func _build_checklist() -> void:
 	_refresh_task_count()
 
 
-## Ticks a checklist task off (called by game events).
+## Ticks a checklist task off (ids that aren't tasks are ignored).
 func complete_task(id: StringName) -> void:
 	if _done.get(id, false) or not _task_rows.has(id):
 		return
@@ -180,47 +430,7 @@ func _refresh_task_count() -> void:
 	%ChecklistTab.text = "%d/%d" % [count, TASKS.size()]
 
 
-# --- Build flow ------------------------------------------------------------
-
-func _open_build_popup() -> void:
-	if _greenhouse_built:
-		_say(&"info", "", "Your greenhouse is growing food! More modules are coming soon.")
-		return
-	_popup.visible = true
-	Events.build_popup_opened.emit(&"greenhouse")
-	_popup.modulate.a = 0.0
-	create_tween().tween_property(_popup, "modulate:a", 1.0, 0.2)
-	%ConfirmButton.grab_focus()
-
-
-func _close_build_popup(cancelled := true) -> void:
-	if cancelled and _popup.visible:
-		Events.build_cancelled.emit(&"greenhouse")
-	_popup.visible = false
-	%BuildButton.grab_focus()
-
-
-func _confirm_build() -> void:
-	_close_build_popup(false)
-	_greenhouse_built = true
-	var targets := {}
-	for key in GREENHOUSE_DELTA:
-		var bar: ResourceBar = _bars[key]
-		targets[key] = clampf(bar.value + GREENHOUSE_DELTA[key], 0.0, 100.0)
-		bar.animate_to(targets[key], _status_for(targets[key]))
-		_show_delta(bar, GREENHOUSE_DELTA[key])
-		Events.resource_changed.emit(key, GREENHOUSE_DELTA[key])
-	complete_task(&"greenhouse")
-	_update_health(targets)
-	build_confirmed.emit(&"greenhouse")
-	Events.build_confirmed.emit(&"greenhouse")
-
-	if _bars[&"power"].status != ResourceBar.Status.HEALTHY:
-		_say(&"warning", "Need more power!",
-			"Your greenhouse makes more food, but it also uses power. Try adding a solar panel.")
-	else:
-		_say(&"success", "Great balance!", "Your resources are well balanced!")
-
+# --- Feedback --------------------------------------------------------------
 
 ## Bounces a resource pill and pops its change ("+30" / "-20") just below it.
 func _show_delta(bar: ResourceBar, amount: float) -> void:
@@ -250,18 +460,6 @@ func _show_delta(bar: ResourceBar, amount: float) -> void:
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	t.parallel().tween_property(label, "modulate:a", 0.0, 0.45)
 	t.tween_callback(label.queue_free)
-
-
-## Colony health = the weakest resource ("Are we okay?" at a glance). Uses the
-## same green / yellow / red status scale as every other gauge. `targets` holds
-## the values bars are animating towards, since their `value` lags behind.
-func _update_health(targets := {}) -> void:
-	var lowest := 100.0
-	for key in _bars:
-		lowest = minf(lowest, targets.get(key, _bars[key].value))
-	var status := _status_for(lowest)
-	_health.display_text = HEALTH_TEXT[status]
-	_health.animate_to(lowest, status)
 
 
 ## Mascot speech: pose + bubble colour + title, so meaning never relies on colour alone.

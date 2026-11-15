@@ -375,10 +375,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -205.0
-offset_top = -215.0
-offset_right = 205.0
-offset_bottom = 215.0
+offset_left = -230.0
+offset_top = -262.0
+offset_right = 230.0
+offset_bottom = 262.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -397,15 +397,24 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="BuildPopup/Frame/Card/Content"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 theme_type_variation = &"H2"
 text = "Build Greenhouse?"
 vertical_alignment = 1
 
+[node name="Options" type="GridContainer" parent="BuildPopup/Frame/Card/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 3
+
 [node name="Illustration" type="TextureRect" parent="BuildPopup/Frame/Card/Content"]
+unique_name_in_owner = true
 material = ExtResource("sticker")
-custom_minimum_size = Vector2(0, 110)
+custom_minimum_size = Vector2(0, 76)
 layout_mode = 2
 texture = ExtResource("b_greenhouse")
 expand_mode = 1
@@ -416,105 +425,12 @@ layout_mode = 2
 theme_type_variation = &"TagPanel"
 
 [node name="Rows" type="VBoxContainer" parent="BuildPopup/Frame/Card/Content/Effects"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 6
-
-[node name="Uses" type="HBoxContainer" parent="BuildPopup/Frame/Card/Content/Effects/Rows"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="Mark" type="TextureRect" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Uses"]
-custom_minimum_size = Vector2(24, 24)
-layout_mode = 2
-size_flags_vertical = 4
-texture = ExtResource("i_remove")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Label" type="Label" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Uses"]
-custom_minimum_size = Vector2(104, 0)
-layout_mode = 2
-theme_type_variation = &"DarkCaption"
-text = "Will Use:"
-
-[node name="Water" type="TextureRect" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Uses"]
-custom_minimum_size = Vector2(26, 26)
-layout_mode = 2
-size_flags_vertical = 4
-texture = ExtResource("i_water")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Power" type="TextureRect" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Uses"]
-custom_minimum_size = Vector2(26, 26)
-layout_mode = 2
-size_flags_vertical = 4
-texture = ExtResource("i_power")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Value" type="Label" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Uses"]
-layout_mode = 2
-theme_type_variation = &"DarkCaption"
-text = "Water, Power"
-
-[node name="Improves" type="HBoxContainer" parent="BuildPopup/Frame/Card/Content/Effects/Rows"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="Mark" type="TextureRect" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Improves"]
-custom_minimum_size = Vector2(24, 24)
-layout_mode = 2
-size_flags_vertical = 4
-texture = ExtResource("i_add")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Label" type="Label" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Improves"]
-custom_minimum_size = Vector2(104, 0)
-layout_mode = 2
-theme_type_variation = &"DarkCaption"
-text = "Will Improve:"
-
-[node name="Food" type="TextureRect" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Improves"]
-custom_minimum_size = Vector2(26, 26)
-layout_mode = 2
-size_flags_vertical = 4
-texture = ExtResource("i_food")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Value" type="Label" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Improves"]
-layout_mode = 2
-theme_type_variation = &"DarkCaption"
-text = "More food"
-
-[node name="TradeOff" type="HBoxContainer" parent="BuildPopup/Frame/Card/Content/Effects/Rows"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="Mark" type="TextureRect" parent="BuildPopup/Frame/Card/Content/Effects/Rows/TradeOff"]
-custom_minimum_size = Vector2(24, 24)
-layout_mode = 2
-size_flags_vertical = 4
-texture = ExtResource("i_info")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Label" type="Label" parent="BuildPopup/Frame/Card/Content/Effects/Rows/TradeOff"]
-custom_minimum_size = Vector2(104, 0)
-layout_mode = 2
-theme_type_variation = &"DarkCaption"
-text = "Trade-off:"
-
-[node name="Value" type="Label" parent="BuildPopup/Frame/Card/Content/Effects/Rows/TradeOff"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"DarkCaption"
-text = "Higher water use"
-autowrap_mode = 3
 
 [node name="Explanation" type="Label" parent="BuildPopup/Frame/Card/Content"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"Caption"
 text = "A greenhouse grows food, but it needs water and power."

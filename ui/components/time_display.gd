@@ -1,26 +1,12 @@
 class_name TimeDisplay
 extends PanelContainer
-## Top-left HUD clock. Static for now: nothing advances it. A future game-time
-## system only needs to set `seconds` (or call set_time) to drive it.
-
-@export var seconds := 0:
-	set(v):
-		seconds = maxi(v, 0)
-		_refresh()
+## Top-left mission day card: "Day N" plus today's sunlight in plain words.
 
 @onready var _label: Label = %TimeLabel
+@onready var _sun: Label = %SunLabel
 
 
-func _ready() -> void:
-	_refresh()
-
-
-func set_time(total_seconds: int) -> void:
-	seconds = total_seconds
-
-
-func _refresh() -> void:
-	if not is_node_ready():
-		return
-	_label.text = "%02d:%02d" % [seconds / 60, seconds % 60]
-	tooltip_text = "Mission time"
+func show_day(day: int, sun: String) -> void:
+	_label.text = "Day %d" % day
+	_sun.text = sun
+	tooltip_text = "Mission day %d. %s today." % [day, sun]

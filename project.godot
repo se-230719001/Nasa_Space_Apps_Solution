@@ -18,6 +18,7 @@ config/icon="uid://cb4n5tj35s5r1"
 [autoload]
 
 Events="*res://scenes/core/events.gd"
+Colony="*res://scenes/core/colony.gd"
 Music="*res://scenes/audio/music_director.gd"
 Sfx="*res://scenes/audio/sfx_director.gd"
 

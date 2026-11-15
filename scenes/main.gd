@@ -1,29 +1,57 @@
 extends Node3D
-## Outpost scene root: reacts to HUD decisions by changing the 3D world.
+## Outpost scene root: mirrors the Colony simulation in the 3D world.
+
+## Where each buildable module appears. The greenhouse uses the green
+## placement tile; the others have fixed lots inside the dome.
+const LOTS := {
+	&"greenhouse": Vector3(0.5, 0, 3.5),
+	&"shield": Vector3(-5.5, 0, 6.0),
+	&"rover": Vector3(9.0, 0, -8.5),
+}
+const SCENES := {
+	&"greenhouse": preload("res://scenes/buildings/greenhouse.gd"),
+	&"shield": preload("res://scenes/buildings/shield_generator.gd"),
+	&"rover": preload("res://scenes/buildings/rover.gd"),
+}
 
 @onready var _tile: MeshInstance3D = $World/PlacementTile
+var _spawned := {}
 
 
 func _ready() -> void:
-	$UI/OutpostHUD.build_confirmed.connect(_on_build_confirmed)
+	# Modules that start in the scene, so upgrades can react on them too.
+	_spawned = {&"habitat": $World/HabitatBase, &"solar": $World/SolarArray, &"water_tank": $World/WaterTank}
+	Colony.module_changed.connect(_on_module_changed)
 	Events.screen_changed.emit(&"outpost")
 
 
-func _on_build_confirmed(module_id: StringName) -> void:
-	if module_id != &"greenhouse":
+func _on_module_changed(module_id: StringName, level: int) -> void:
+	if _spawned.has(module_id):
+		var existing: Node3D = _spawned[module_id]
+		if "level" in existing:
+			existing.level = level
+		_pop(existing)
 		return
-	var greenhouse := Greenhouse.new()
-	greenhouse.position = Vector3(_tile.position.x, 0.0, _tile.position.z)
-	greenhouse.scale = Vector3.ONE * 0.01
-	$World.add_child(greenhouse)
-	_tile.hide()
-	# Construction flourish (style guide §12.2): grow tall, squash, settle,
-	# with a dust puff. Resource changes are shown in the HUD, not in 3D.
+	if not SCENES.has(module_id):
+		return
+	var module: Node3D = SCENES[module_id].new()
+	module.position = LOTS[module_id]
+	$World.add_child(module)
+	_spawned[module_id] = module
+	if module_id == &"greenhouse":
+		_tile.hide()
+	_pop(module)
+
+
+## Construction flourish (style guide §12.2): grow tall, squash, settle, with a
+## dust puff. Resource changes are shown in the HUD, not in 3D.
+func _pop(node: Node3D) -> void:
+	node.scale = Vector3.ONE * 0.01
 	var pop := create_tween().set_ease(Tween.EASE_OUT)
-	pop.tween_property(greenhouse, "scale", Vector3(0.85, 1.2, 0.85), 0.2).set_trans(Tween.TRANS_QUAD)
-	pop.tween_property(greenhouse, "scale", Vector3(1.1, 0.9, 1.1), 0.12).set_trans(Tween.TRANS_SINE)
-	pop.tween_property(greenhouse, "scale", Vector3.ONE, 0.25).set_trans(Tween.TRANS_SINE)
-	_dust_puff(greenhouse.position)
+	pop.tween_property(node, "scale", Vector3(0.85, 1.2, 0.85), 0.2).set_trans(Tween.TRANS_QUAD)
+	pop.tween_property(node, "scale", Vector3(1.1, 0.9, 1.1), 0.12).set_trans(Tween.TRANS_SINE)
+	pop.tween_property(node, "scale", Vector3.ONE, 0.25).set_trans(Tween.TRANS_SINE)
+	_dust_puff(node.position)
 
 
 func _dust_puff(at: Vector3) -> void:

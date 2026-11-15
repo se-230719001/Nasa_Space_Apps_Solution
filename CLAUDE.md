@@ -69,6 +69,12 @@ Current signals: `screen_changed`, `button_pressed`, `build_popup_opened`, `buil
   instead of per-node style overrides.
 - Art: `assets/generated/moonminds/` (1254px sources, mipmaps on). HUD art gets
   `ui/theme/sticker.tres` for the white sticker rim.
+- Game rules live in `scenes/core/outpost_simulation.gd` (see `GAME_ARCHITECTURE.md`); the live
+  state is the `Colony` autoload (`scenes/core/colony.gd`). HUD and 3D world only call `Colony`
+  actions/previews and react to its signals; never hard-code resource numbers in UI.
+- New buildable module: add it to `OutpostSimulation.MODULES`, a procedural `OutpostModule`
+  script in `scenes/buildings/`, its lot + script in `scenes/main.gd`, and its `INFO`/`MENUS`
+  entry in `ui/screens/outpost_hud.gd`.
 - Mascot speaks through `%Helper.say(kind, title, text)` (`ui/components/mascot_helper.gd`).
 - 3D buildings are procedural (`scenes/buildings/`, materials via `BuildingKit.mat()`).
 
