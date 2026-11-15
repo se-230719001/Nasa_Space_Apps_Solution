@@ -108,7 +108,7 @@ Explore, Rover varsa bir saha gezisi başlatır. Onaydan önce o seviye için ge
 
 `Gözlemle → Search ile plan aç veya Explore görevi seç → maliyet/sonuç önizle → onayla → aynı günlük simülasyonu çalıştır → sonuç ve nedenini göster`.
 
-Build/Upgrade gün ilerletmez; ancak kit yatırımı yapar. Böylece oyuncu üs düzenlemesini güvenle yapabilir, Search ve Explore ise zaman ve stok kararı olur. Eksik kaynağa dayanan işlem başlatılmaz; HUD eksik kaynağı ve bir sonraki çözüm yolunu adlandırır.
+Build/Upgrade gün ilerletmez; ancak kit yatırımı yapar. Oyuncu "Next Day" ile günü her zaman kendisi de bitirebilir (bekleme hamlesi); Mission Control her gün 1 kit getirir (üst sınır 30). Böylece yanlış kit harcaması veya araştırma sırası oyunu kilitleyemez. Böylece oyuncu üs düzenlemesini güvenle yapabilir, Search ve Explore ise zaman ve stok kararı olur. Eksik kaynağa dayanan işlem başlatılmaz; HUD eksik kaynağı ve bir sonraki çözüm yolunu adlandırır.
 
 ## 7–12 yaş için anlaşılırlık
 

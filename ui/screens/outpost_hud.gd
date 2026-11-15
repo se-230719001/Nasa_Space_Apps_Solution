@@ -81,6 +81,7 @@ func _ready() -> void:
 	%SearchButton.pressed.connect(_open_menu.bind(&"search"))
 	%ExploreButton.pressed.connect(_open_menu.bind(&"explore"))
 	%ExploreButton.pressed.connect(Events.screen_changed.emit.bind(&"explore"))
+	%NextDayButton.pressed.connect(Colony.rest)
 	for button in find_children("*", "BaseButton", true, false):
 		button.pressed.connect(Events.button_pressed.emit.bind(StringName(button.name)))
 	%SettingsButton.pressed.connect(_say.bind(&"info", "", "Settings will live here."))

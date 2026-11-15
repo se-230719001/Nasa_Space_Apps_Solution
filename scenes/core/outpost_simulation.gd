@@ -6,6 +6,9 @@ const CAPACITY := {&"power": 100.0, &"water": 100.0, &"food": 100.0, &"oxygen": 
 const START := {&"power": 70.0, &"water": 65.0, &"food": 45.0, &"oxygen": 80.0}
 const START_KITS := 18.0
 const KIT_CAPACITY := 30.0
+## Mission Control supply shuttle: a small daily kit delivery so spending kits
+## on the "wrong" module can never lock the run (wait a few days instead).
+const DAILY_KITS := 1.0
 const CREW_SIZE := 2
 const CREW_DAILY := {&"water": 2.0, &"food": 2.0, &"oxygen": 4.0}
 const MAX_LEVEL := 3
@@ -194,10 +197,12 @@ static func advance_day(state: Dictionary, environment := {}) -> Dictionary:
 			worst_shortage = maxf(worst_shortage, float(unmet[key]) / need)
 	var health_loss := ceilf(worst_shortage * 10.0) + maxf(0.0, radiation_after_shield - 2.0)
 	state.crew_health = clampf(float(state.crew_health) - health_loss, 0.0, 100.0)
+	var kits_delivered := minf(DAILY_KITS, KIT_CAPACITY - float(state.kits))
+	state.kits = float(state.kits) + kits_delivered
 	state.day = int(state.day) + 1
 	var report := {"day": state.day, "generated_power": generated, "spilled_power": spilled,
 		"spilled_food": food_spilled, "spilled_oxygen": oxygen_spilled,
-		"power_support": power_support, "unmet_crew_needs": unmet, "water_recovered": water_recovered, "water_mined": water_mined,
+		"power_support": power_support, "unmet_crew_needs": unmet, "water_recovered": water_recovered, "water_mined": water_mined, "kits_delivered": kits_delivered,
 		"food_made": food_made, "oxygen_made": oxygen_made, "radiation_after_shield": radiation_after_shield,
 		"health_loss": health_loss, "crew_health": state.crew_health, "stores": stores.duplicate()}
 	state.history.append(report.duplicate())

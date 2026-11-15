@@ -22,6 +22,7 @@
 [ext_resource type="Material" path="res://ui/theme/sticker.tres" id="sticker"]
 [ext_resource type="Script" path="res://ui/components/mascot_helper.gd" id="mascot_helper"]
 [ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_close.png" id="i_close"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_clock.png" id="i_clock"]
 
 [sub_resource type="StyleBoxEmpty" id="empty"]
 
@@ -87,6 +88,22 @@ offset_left = 24.0
 offset_top = 16.0
 offset_right = 184.0
 offset_bottom = 72.0
+
+[node name="NextDayButton" type="Button" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 1
+offset_left = 24.0
+offset_top = 86.0
+offset_right = 184.0
+offset_bottom = 138.0
+tooltip_text = "End the day and see what happens"
+mouse_default_cursor_shape = 2
+theme_type_variation = &"IconButton"
+theme_override_constants/icon_max_width = 26
+theme_override_font_sizes/font_size = 18
+text = "Next Day"
+icon = ExtResource("i_clock")
 
 [node name="Resources" type="HBoxContainer" parent="."]
 layout_mode = 1

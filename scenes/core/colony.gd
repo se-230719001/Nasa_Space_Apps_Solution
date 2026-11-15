@@ -88,6 +88,11 @@ func explore() -> Dictionary:
 	return _run_day(func(): return OutpostSimulation.explore(state, environment()))
 
 
+## Just let the day pass (always possible, so the player can never get stuck).
+func rest() -> Dictionary:
+	return _run_day(func(): return {"ok": true, "day_report": OutpostSimulation.advance_day(state, environment())})
+
+
 func emergency_supply() -> Dictionary:
 	return _run_day(func(): return OutpostSimulation.emergency_supply(state, environment()))
 
