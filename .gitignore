@@ -8,3 +8,25 @@
 # NASA raw datasets are large; re-download with tools/nasa/build_nasa_db.py (sha256 in nasa_db/manifest.csv)
 nasa_db/raw/datasets/*.IMG
 build/
+
+# Local editors and credentials
+/.idea/
+/.vscode/
+/.aws/
+.env
+.env.*
+!.env.example
+!.env.*.example
+export_credentials.cfg
+
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+/.venv/
+/venv/
+.pytest_cache/
+
+# Generated presentation exports (screenshots are build inputs)
+/slideshow/output/*.pdf
+/slideshow/output/Fredoka-Semibold.ttf
+/slideshow/output/Fredoka-Semibold.ttf.import
