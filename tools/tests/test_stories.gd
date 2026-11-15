@@ -115,7 +115,7 @@ func _initialize() -> void:
 	if current_scene.is_placing():  # new buildings: pick parcels (base grid)
 		current_scene.confirm_placement()
 	await create_timer(colony.AUTO_NEXT_DELAY + 4.2).timeout
-	check("debrief comes first, alone", "Mission debrief" in card_text() and not "LCROSS" in card_text())
+	check("debrief comes first, alone", "What did we learn today?" in card_text() and not "LCROSS" in card_text())
 	await close_card()
 	await frames(3)
 	check("then day 2's real problem (fix hidden)", "LCROSS" in card_text() and not "Your turn" in card_text())
@@ -124,6 +124,8 @@ func _initialize() -> void:
 	check("hint ties to NASA's sunlight map", "about 1 in 10 spots near the pole stay dark" in card_text())
 	option(1).pressed.emit()  # second miss
 	await frames()
+	check("two misses: no guess star (right answers only)", Rewards.stars_for(colony.state, &"ice_drill") == 0)
+	check("first-try/after-hint right answer did earn it", colony.state.stars[&"greenhouse"].get("guessed", false))
 	check("two misses: answer explained kindly, card opens up", "Good thinking! NASA's answer: Crash something in" in card_text() \
 		and "Your turn: Build an Ice Drill." in card_text() and "My turn!" in card_text())
 	await close_card()

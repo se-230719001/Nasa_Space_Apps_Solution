@@ -85,7 +85,7 @@ func build_via_card(id: StringName) -> void:
 ## Waits out the automatic night, then closes the debrief card it brings.
 func next_night() -> void:
 	await create_timer(colony.AUTO_NEXT_DELAY + 0.8).timeout  # night + the list's fold animation
-	while modal() != null and "Mission debrief" in modal_text():
+	while modal() != null and "What did we learn today?" in modal_text():
 		await press_choice(0)
 
 
@@ -97,6 +97,13 @@ func _initialize() -> void:
 	colony.delete_save()
 	change_scene_to_file("res://scenes/main.tscn")
 	await settle()
+
+	# --- Title screen on launch: no save yet, so only "New mission" ---
+	var title: Control = hud.get_node_or_null("TitleScreen")
+	check("title screen with the cover art on launch", title != null and title.get_child(0).texture != null)
+	check("no Continue without a save", title.find_child("ContinueButton", true, false) == null)
+	title.find_child("NewButton", true, false).pressed.emit()
+	await frames(3)
 
 	# --- Start: pick a training campaign ---
 	check("first launch asks for a training campaign", "Pick your training" in modal_text())
@@ -175,8 +182,9 @@ func _initialize() -> void:
 	colony.state = colony._fresh_state()
 	reload_current_scene()
 	await settle()
-	check("new launch offers to continue", "Welcome back!" in modal_text())
-	await press_choice(0)  # Continue -> reload
+	title = hud.get_node_or_null("TitleScreen")
+	check("new launch: title screen offers Continue", title != null and title.find_child("ContinueButton", true, false) != null)
+	title.find_child("ContinueButton", true, false).pressed.emit()  # Continue -> reload
 	await settle()
 	check("continue restores day 2 and the greenhouse", colony.state.day == 2 and colony.state.modules.has(&"greenhouse")
 		and scene.get_node("World").find_children("*", "Greenhouse", false, false).size() == 1)

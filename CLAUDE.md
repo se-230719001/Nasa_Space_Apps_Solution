@@ -55,7 +55,7 @@ Rules for `events.gd`:
 - Screenshot: same kind of script without `--headless`, `--resolution 1280x720 --windowed`,
   then `root.get_texture().get_image().save_png(path)` after ~150 frames (splash fades first).
 - Tests (exit 0 = pass): `<godot> --headless --path . --script res://tools/tests/test_simulation.gd`
-  (sim rules), `test_hud_flow.gd` (start → 8 days → win), `test_learning_flow.gd`, `test_hud_ui.gd`, `test_stories.gd`, `test_nasa_db.gd`, `test_mission_cards.gd`, `test_base_grid.gd`, `test_rewards.gd`, `test_full_runs.gd` (all 3 campaigns end to end). Keep them green.
+  (sim rules), `test_hud_flow.gd` (start → 8 days → win), `test_learning_flow.gd`, `test_hud_ui.gd`, `test_stories.gd`, `test_nasa_db.gd`, `test_mission_cards.gd`, `test_base_grid.gd`, `test_rewards.gd`, `test_full_runs.gd` (all 3 campaigns end to end), `test_realtime_input.gd` (real clicks/Esc; run windowed: `--resolution 1024x576 --windowed`). Keep them green.
 - New Events signals since the audio side last synced are listed in `audio_handoff.md`.
 - NASA sources live in `nasa_db/` (raw untouched, processed + `manifest.csv`); rebuild with
   `python3 -I tools/nasa/build_nasa_db.py`. No file without a manifest row; never write an API key.

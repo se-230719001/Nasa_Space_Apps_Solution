@@ -125,6 +125,8 @@ func _ready() -> void:
 		bar.pressed.connect(_show_supplies)
 		bar.pressed.connect(Events.button_pressed.emit.bind(&"ResourcePill"))
 	_add_info_button()
+	_build_star_counter()
+	Colony.star_earned.connect(func(_id: StringName) -> void: _gain_star())
 	_build_placement_bar()
 	if owner and owner.has_signal(&"placement_started"):
 		_world = owner
@@ -142,8 +144,11 @@ func _ready() -> void:
 		var say := Events.button_pressed.emit.bind(StringName(button.name))
 		if not button.pressed.is_connected(say):  # some build their own wiring
 			button.pressed.connect(say)
-	%SettingsButton.hide()  # no settings yet: a button that does nothing confuses kids
+	%SettingsButton.pressed.connect(_show_settings)
 	%CloseButton.pressed.connect(_close_menu)
+	_popup.get_node("Dim").gui_input.connect(func(e: InputEvent) -> void:  # tap outside the card closes it
+		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+			_close_menu())
 	%CancelButton.pressed.connect(_close_menu)
 	%ConfirmButton.pressed.connect(_confirm)
 	%ChecklistTab.pressed.connect(toggle_checklist)
@@ -168,10 +173,38 @@ func _ready() -> void:
 	_play_splash()
 
 
+## Esc / back closes what's on top: placement, the build card, an info card,
+## the Mission Days panel. A click outside the open Mission Days panel closes it.
 func _unhandled_input(event: InputEvent) -> void:
-	if _popup.visible and event.is_action_pressed(&"ui_cancel"):
-		_close_menu()
+	if event.is_action_pressed(&"ui_cancel"):
+		var top := _top_modal()
+		if _world and _world.is_placing():
+			_world.cancel_placement()
+		elif _popup.visible:
+			_close_menu()
+		elif top:
+			if top.get_meta(&"dismissable", false):
+				_dismiss(top)
+		elif _checklist_open:
+			toggle_checklist()
+		else:
+			return
 		get_viewport().set_input_as_handled()
+	elif _checklist_open and event is InputEventMouseButton and event.pressed \
+			and event.button_index == MOUSE_BUTTON_LEFT and _top_modal() == null:
+		toggle_checklist()
+		get_viewport().set_input_as_handled()
+
+
+func _top_modal() -> Control:
+	var open := get_tree().get_nodes_in_group(&"hud_modal").filter(func(m): return not m.is_queued_for_deletion())
+	return open.back() if not open.is_empty() else null
+
+
+## Closes an info card like its own close button would (no choice is made).
+func _dismiss(overlay: Control) -> void:
+	Events.button_pressed.emit(&"CloseCard")
+	overlay.queue_free()
 
 
 func _play_splash() -> void:
@@ -342,7 +375,7 @@ func _debrief(report: Dictionary, before: Dictionary, task: Dictionary) -> void:
 		lines.append("In your base: you did it! %s." % task.text)
 	lines.append("Like NASA: " + task.quiz.same)
 	lines.append("Different: " + task.quiz.different)
-	var m := _modal("Mission debrief", "", "\n".join(lines), [["OK", func() -> void: pass]])  # no art: it fits 576 px
+	var m := _modal("What did we learn today?", "", "\n".join(lines), [["OK", func() -> void: pass]])  # no art: it fits 576 px
 	m.find_child("Body", true, false).horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	if task.has("why"):
 		_why_question(m, task)
@@ -357,7 +390,7 @@ func _why_question(m: Control, task: Dictionary) -> void:
 	box.add_theme_constant_override(&"separation", 6)
 	col.add_child(box)
 	col.move_child(box, col.get_child_count() - 2)  # above OK
-	_info_label(box, "One more star: " + task.why.question, 17, true)
+	_info_label(box, "Get it right for a star: " + task.why.question, 17, true)
 	var feedback := Label.new()
 	feedback.name = "WhyFeedback"
 	feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -375,7 +408,7 @@ func _why_question(m: Control, task: Dictionary) -> void:
 		b.pressed.connect(Events.button_pressed.emit.bind(StringName(b.name)))
 		b.pressed.connect(func() -> void:
 			Colony.answer_why(task.id, opt.correct)
-			feedback.text = ("✓ Yes! +1 star. " if opt.correct else "Good thinking, +1 star! Here's why: ") + task.why.explain
+			feedback.text = ("✓ Yes! +1 star. " if opt.correct else "Not quite, no star this time. Here's why: ") + task.why.explain
 			for other in box.get_children():
 				if other is Button:
 					other.disabled = true)
@@ -798,7 +831,8 @@ func _tutorial_step(i: int) -> void:
 		node.z_index = 0
 	_lifted.clear()
 	var next: Button = _tutorial.get_node("TutorialNext")
-	while i < TUTORIAL.size() and not _focus_node(TUTORIAL[i].focus).is_visible_in_tree():
+	%Helper.show()  # Robo leads the tutorial (a card closing may have hidden it)
+	while i < TUTORIAL.size() and not _step_shown(TUTORIAL[i]):
 		i += 1  # e.g. no resource bars in this run
 	if i >= TUTORIAL.size():
 		_tutorial.queue_free()
@@ -819,7 +853,12 @@ func _tutorial_step(i: int) -> void:
 
 ## The tutorial steps this run will actually show.
 func _tutorial_steps() -> Array:
-	return TUTORIAL.filter(func(st): return _focus_node(st.focus).is_visible_in_tree())
+	return TUTORIAL.filter(_step_shown)
+
+
+## A step is shown when its focus is on screen; Robo always is during the tutorial.
+func _step_shown(step: Dictionary) -> bool:
+	return step.focus == &"Helper" or _focus_node(step.focus).is_visible_in_tree()
 
 
 func _focus_node(id: StringName) -> CanvasItem:
@@ -850,24 +889,34 @@ func _show_mission_end(result: Dictionary) -> void:
 		[["Play Again", func() -> void:
 			Colony.reset()
 			Colony.session_chosen = false  # a new mission: pick a campaign again
-			get_tree().reload_current_scene()]])
+			get_tree().reload_current_scene()]], false)
 
 
 ## Centered card over a dim backdrop: title, mascot art, body text and big
 ## buttons (`buttons` = [[text, callable], ...]; the first one is primary).
 ## Any button closes the card before running its action.
-func _modal(title_text: String, art_name: String, body_text: String, buttons: Array) -> Control:
+## `dismissable`: an info card that also closes with its ✕, a tap outside it,
+## or Esc. Steps the game needs an answer to (campaign, name, flag, the end
+## card, the rescue) pass false.
+func _modal(title_text: String, art_name: String, body_text: String, buttons: Array, dismissable := true) -> Control:
 	var overlay := Control.new()
 	overlay.name = "Modal"
 	overlay.add_to_group(&"hud_modal")  # names clash while the last one frees
 	overlay.tree_exited.connect(_next_card)
+	%Helper.hide()  # the robot steps aside while a card is open; back when none is
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	overlay.z_index = 6
 	add_child(overlay)
+	overlay.set_meta(&"dismissable", dismissable)
 	var dim := ColorRect.new()
+	dim.name = "Dim"
 	dim.color = Color(0.02, 0.03, 0.1, 0.6)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	overlay.add_child(dim)
+	if dismissable:
+		dim.gui_input.connect(func(e: InputEvent) -> void:
+			if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+				_dismiss(overlay))
 	var card := PanelContainer.new()
 	card.theme_type_variation = &"PopupCard"
 	card.custom_minimum_size = Vector2(460, 0)
@@ -878,11 +927,29 @@ func _modal(title_text: String, art_name: String, body_text: String, buttons: Ar
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override(&"separation", 12)
 	card.add_child(col)
+	# Header: title centred, ✕ on the right (a same-size spacer on the left).
+	var header := HBoxContainer.new()
+	col.add_child(header)
+	if dismissable:
+		var spacer := Control.new()
+		spacer.custom_minimum_size = Vector2(48, 48)
+		header.add_child(spacer)
 	var title := Label.new()
 	title.theme_type_variation = &"H1"
 	title.text = title_text
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(title)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(title)
+	if dismissable:
+		var x := TextureButton.new()
+		x.name = "CloseX"
+		x.tooltip_text = "Close"
+		x.texture_normal = load(ART % "icon_close")
+		x.ignore_texture_size = true
+		x.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+		x.custom_minimum_size = Vector2(48, 48)
+		x.pressed.connect(_dismiss.bind(overlay))
+		header.add_child(x)
 	if art_name != "":
 		var art := TextureRect.new()
 		art.texture = load(ART % art_name)
@@ -913,7 +980,22 @@ func _modal(title_text: String, art_name: String, body_text: String, buttons: Ar
 		b.pressed.connect(buttons[i][1])
 		row.add_child(b)
 	row.get_child(0).grab_focus()
+	_fit_card.call_deferred(card)
 	return overlay
+
+
+## A card taller than the screen gives the overflow back from its scroll box,
+## so the title, ✕ and buttons always stay on screen (1024x576 and smaller).
+func _fit_card(card: Control) -> void:
+	await get_tree().process_frame
+	if not is_instance_valid(card):
+		return
+	var over := card.get_combined_minimum_size().y - (size.y - 16.0)
+	if over <= 0.0:
+		return
+	for sc in card.find_children("*", "ScrollContainer", true, false):
+		sc.custom_minimum_size.y = maxf(120.0, sc.custom_minimum_size.y - over)
+		return
 
 
 # --- Start of a sitting ------------------------------------------------------
@@ -923,21 +1005,70 @@ func _modal(title_text: String, art_name: String, body_text: String, buttons: Ar
 func _start_flow() -> void:
 	if Colony.session_chosen:  # retried a day / reloaded mid-sitting
 		_begin_day()
-	elif not Colony.save_offered and Colony.has_save():
+	elif not Colony.save_offered:  # first time this app run: the title screen
 		Colony.save_offered = true
-		_modal("Welcome back!", "mascot_wave", "Your Moon base is saved. Do you want to go on with it?", [
-			["Continue", func() -> void:
-				# The save holds its campaign, so a loaded run skips the picker.
-				Colony.session_chosen = Colony.load_save()
-				if not Colony.session_chosen:
-					Colony.reset()
-				get_tree().reload_current_scene()],
-			["New mission", func() -> void:
-				Colony.reset()
-				get_tree().reload_current_scene()]])
+		_show_title()
 	else:
-		Colony.save_offered = true
 		_ask_campaign()
+
+
+## Title screen, once per app launch: the cover art, the logo and two big
+## buttons. Continue only when there is a saved mission; starting over with a
+## save asks first, so a base is never wiped by one tap.
+func _show_title() -> void:
+	var title := Control.new()
+	title.name = "TitleScreen"
+	title.set_anchors_preset(Control.PRESET_FULL_RECT)
+	title.z_index = 5  # over the HUD, under cards (6)
+	add_child(title)
+	var bg := TextureRect.new()
+	bg.texture = load("res://assets/ui/cover.png")
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	title.add_child(bg)
+	var col := VBoxContainer.new()
+	col.position = Vector2(64, 60)
+	col.custom_minimum_size = Vector2(380, 0)
+	col.add_theme_constant_override(&"separation", 16)
+	title.add_child(col)
+	var logo := TextureRect.new()
+	logo.texture = load(ART % "logo_moonminds")
+	logo.custom_minimum_size = Vector2(380, 190)
+	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	col.add_child(logo)
+	var start := func() -> void:
+		title.queue_free()
+		_ask_campaign()
+	var buttons := []
+	if Colony.has_save():
+		buttons.append(["ContinueButton", "Continue", func() -> void:
+			# The save holds its campaign, so a loaded run skips the picker.
+			Colony.session_chosen = Colony.load_save()
+			if not Colony.session_chosen:
+				Colony.reset()
+			get_tree().reload_current_scene()])
+	buttons.append(["NewButton", "New mission", func() -> void:
+		if not Colony.has_save():
+			start.call()
+			return
+		_modal("Start a new mission?", "mascot_think", "Your saved base and stars will be cleared.", [
+			["Yes, start over", func() -> void:
+				Colony.reset()
+				start.call()],
+			["No, go back", func() -> void: pass]])])
+	for i in buttons.size():
+		var b := Button.new()
+		b.name = buttons[i][0]
+		b.text = buttons[i][1]
+		b.theme_type_variation = &"PrimaryButton" if i == 0 else &"Button"
+		b.custom_minimum_size = Vector2(380, 76)
+		b.add_theme_font_size_override(&"font_size", 28)
+		b.pressed.connect(Events.button_pressed.emit.bind(StringName(b.name)))
+		b.pressed.connect(buttons[i][2])
+		col.add_child(b)
+	col.get_child(1).grab_focus()
 
 
 ## Picks the training: each card names its days and the years of the real
@@ -953,7 +1084,7 @@ func _ask_campaign() -> void:
 			_build_checklist()
 			_sync(false)
 			_ask_base_name()])
-	var m := _modal("Pick your training", "", "Every day is a real problem NASA faced in those years.\n" + "\n".join(lines), buttons)
+	var m := _modal("Pick your training", "", "Every day is a real problem NASA faced in those years.\n" + "\n".join(lines), buttons, false)
 	m.find_child("Body", true, false).horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	for b in m.find_children("Choice*", "Button", true, false):
 		b.add_theme_font_size_override(&"font_size", 17)
@@ -969,7 +1100,7 @@ func _ask_base_name() -> void:
 		buttons.append([n, func() -> void:
 			Colony.set_base(n)
 			_ask_flag()])
-	var m := _modal("Name your base", "mascot_wave", "Pick a name, or type your own. It stays on this device.", buttons)
+	var m := _modal("Name your base", "mascot_wave", "Pick a name, or type your own. It stays on this device.", buttons, false)
 	var col: VBoxContainer = m.find_child("Body", true, false).get_parent()
 	var own := HBoxContainer.new()
 	own.add_theme_constant_override(&"separation", 10)
@@ -1006,7 +1137,7 @@ func _ask_flag() -> void:
 		buttons.append([String(id).capitalize(), func() -> void:
 			Colony.set_base("", id)
 			_briefing()])
-	var m := _modal("Pick your flag", "", "Your flag flies next to the habitat. Which colour?", buttons)
+	var m := _modal("Pick your flag", "", "Your flag flies next to the habitat. Which colour?", buttons, false)
 	var i := 0
 	for id in Colony.FLAGS:
 		var b: Button = m.find_child("Choice%d" % i, true, false)
@@ -1038,7 +1169,7 @@ func _show_rescue() -> void:
 		cause = _problem(Colony.rescue_report)
 	_modal("Mission Control to the rescue!", "mascot_think",
 		"The crew got too weak, so Mission Control helped them rest. Today starts again.\nTip: %s" % HINTS[cause][1],
-		[["Try again", get_tree().reload_current_scene]])
+		[["Try again", get_tree().reload_current_scene]], false)
 
 
 ## "Why?" on the Today card: last night's numbers for every store, plus
@@ -1156,6 +1287,57 @@ func _on_building_tapped(id: StringName) -> void:
 
 # --- Rewards (Stage 8) ---------------------------------------------------------
 
+## Science stars are the XP: always on screen (top centre, where the resource
+## bars used to be), and every new one pops "+1 ★".
+func _build_star_counter() -> void:
+	var pill := PanelContainer.new()
+	pill.name = "StarCounter"
+	pill.unique_name_in_owner = true
+	pill.theme_type_variation = &"HudPill"
+	pill.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	pill.offset_top = 16
+	pill.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	pill.mouse_filter = Control.MOUSE_FILTER_STOP
+	pill.tooltip_text = "Science stars: finish missions and get the answers right"
+	add_child(pill)
+	pill.owner = self
+	pill.visible = not _bars_on()  # the old resource game keeps its bars there
+	var label := Label.new()
+	label.name = "Stars"
+	label.theme_type_variation = &"HudValue"
+	label.add_theme_font_size_override(&"font_size", 26)
+	pill.add_child(label)
+	pill.gui_input.connect(func(e: InputEvent) -> void:
+		if e is InputEventMouseButton and e.pressed:
+			_show_log())
+	_refresh_stars()
+
+
+func _refresh_stars() -> void:
+	var n := Rewards.total_stars(Colony.state)
+	%StarCounter.get_node("Stars").text = "★ %d  Science star%s" % [n, "" if n == 1 else "s"]
+	%StarCounter.reset_size()
+
+
+func _gain_star() -> void:
+	_refresh_stars()
+	var pill: Control = %StarCounter
+	_bounce(pill)
+	var pop := Label.new()
+	pop.text = "+1 ★"
+	pop.theme_type_variation = &"HudValue"
+	pop.add_theme_font_size_override(&"font_size", 30)
+	pop.add_theme_color_override(&"font_color", Color("#FFC94A"))
+	pop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(pop)
+	pop.z_index = 7  # above cards: you see it even while a card is open
+	pop.global_position = pill.global_position + Vector2(pill.size.x / 2.0 - 30.0, pill.size.y)
+	var t := create_tween()
+	t.tween_property(pop, "position:y", pop.position.y + 26.0, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_interval(0.7)
+	t.tween_property(pop, "modulate:a", 0.0, 0.4)
+	t.tween_callback(pop.queue_free)
+
 ## Mission Log: one page per finished day (photo, real event, the day's idea,
 ## how you thought it through, stars). Reread any time.
 func _show_log() -> void:
@@ -1197,21 +1379,69 @@ func _show_log() -> void:
 			l.custom_minimum_size.x = 440
 
 
-## Badge shelf: earned badges, and how to earn the others.
+## Settings: things that really work today (sound settings belong to the
+## audio side and come later).
+func _show_settings() -> void:
+	_modal("Settings", "", "Watch the tutorial again, or start a new mission.", [
+		["Tutorial", func() -> void:
+			Colony.tutorial_done = false
+			_tutorial_step(0)],
+		["New mission", func() -> void:
+			_modal("Start a new mission?", "mascot_think", "Your base and stars from this mission will be cleared.", [
+				["Yes, start over", func() -> void:
+					Colony.reset()
+					Colony.session_chosen = false
+					get_tree().reload_current_scene()],
+				["No, keep playing", func() -> void: pass]])],
+		["Close", func() -> void: pass]])
+
+
+## Badge shelf: each badge with its symbol; earned ones bright with ✓, the
+## others faded with ○ and how to earn them (so it's never colour alone).
 func _show_badges() -> void:
-	var lines := []
+	var have: Dictionary = Colony.state.get("badges", {})
+	var m := _modal("Badges", "", "You have %d of %d badges." % [have.size(), Rewards.BADGES.size()], [["Close", func() -> void: pass]])
+	var col: VBoxContainer = m.find_child("Body", true, false).get_parent()
+	var scroll := ScrollContainer.new()
+	scroll.name = "BadgeScroll"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size = Vector2(540, minf(330.0, size.y - 230.0))
+	col.add_child(scroll)
+	col.move_child(scroll, col.get_child_count() - 2)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(list)
 	for id in Rewards.BADGES:
 		var b: Dictionary = Rewards.BADGES[id]
 		var where := ""
 		if b.has("missions"):
 			var names := []
 			for c in OutpostSimulation.CAMPAIGNS.values():
-				if b.missions.all(func(m): return c.days.has(m)):
+				if b.missions.all(func(ms): return c.days.has(ms)):
 					names.append(c.name)
 			where = " (in %s)" % " or ".join(names)
-		lines.append(("✓ %s" % b.name) if Colony.state.get("badges", {}).has(id) else ("○ %s: %s%s" % [b.name, b.how, where]))
-	var m := _modal("Badges", "mascot_celebrate", "\n".join(lines), [["Close", func() -> void: pass]])
-	m.find_child("Body", true, false).horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		var earned: bool = have.has(id)
+		_badge_row(list, id, ("✓ %s" % b.name) if earned else ("○ %s: %s%s" % [b.name, b.how, where]), earned)
+
+
+## One badge line: its symbol and text; not earned yet = faded.
+func _badge_row(parent: Control, id: StringName, text: String, earned := true) -> void:
+	var row := HBoxContainer.new()
+	row.name = "Badge_" + String(id)
+	row.add_theme_constant_override(&"separation", 10)
+	var icon := _icon(Rewards.BADGES[id].icon, 40)
+	icon.name = "Symbol"
+	icon.material = load("res://ui/theme/sticker.tres")
+	row.add_child(icon)
+	var label := Label.new()
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size = Vector2(460, 0)
+	label.add_theme_font_size_override(&"font_size", 16)
+	label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(label)
+	row.modulate.a = 1.0 if earned else 0.55
+	parent.add_child(row)
 
 
 ## New badges and decorations are collected and shown together on one card
@@ -1232,15 +1462,21 @@ func _queue_reward(id: StringName, kind: String) -> void:
 func _show_rewards() -> void:
 	if _new_rewards.is_empty():
 		return
-	var lines := []
+	var decor := []
+	for r in _new_rewards:
+		if r[0] == "decor":
+			decor.append("New decoration: %s! Find it in Build. It's free." % INFO[r[1]].name)
+	var m := _modal("Today's rewards!", "mascot_celebrate", "\n".join(decor), [["Yay!", func() -> void: pass]])
+	var body: Label = m.find_child("Body", true, false)
+	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	body.visible = not decor.is_empty()
 	for r in _new_rewards:
 		if r[0] == "badge":
-			lines.append("New badge: %s! %s" % [Rewards.BADGES[r[1]].name, Rewards.BADGES[r[1]].how])
-		else:
-			lines.append("New decoration: %s! Find it in Build. It's free." % INFO[r[1]].name)
+			var b: Dictionary = Rewards.BADGES[r[1]]
+			var col: VBoxContainer = body.get_parent()
+			_badge_row(col, r[1], "New badge: %s! %s" % [b.name, b.how])
+			col.move_child(col.get_child(-1), body.get_index())
 	_new_rewards.clear()
-	var m := _modal("Today's rewards!", "mascot_celebrate", "\n".join(lines), [["Yay!", func() -> void: pass]])
-	m.find_child("Body", true, false).horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 
 
 # --- Real NASA stories -------------------------------------------------------
@@ -1264,8 +1500,12 @@ func _modal_open() -> bool:
 
 ## A card closed: show the next queued one (each opens after the last closes).
 func _next_card() -> void:
+	if not is_inside_tree():
+		return  # the scene is closing (Play Again / quit)
 	while not _card_queue.is_empty() and not _modal_open():
 		_card_queue.pop_front().call()
+	if not _modal_open():
+		%Helper.show()
 
 
 ## Today's real story, the first time this day is reached (remembered in the save).
@@ -1309,16 +1549,31 @@ func _show_story(task := {}, review := false) -> void:
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	list.add_theme_constant_override(&"separation", 6)
 	scroll.add_child(list)
-	_mission_photo(list, task.id)
-	_info_label(list, "A real problem NASA faced. " + story.where, 15)
+	# Photo beside the problem, so the "what would you do?" ideas stay in view.
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override(&"separation", 12)
+	list.add_child(top)
+	var photo_col := VBoxContainer.new()
+	top.add_child(photo_col)
+	_mission_photo(photo_col, task.id)
+	var text_col := VBoxContainer.new()
+	text_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(text_col)
+	_info_label(text_col, "A real problem NASA faced. " + story.where, 15)
 	if story.note != "":
-		_info_label(list, story.note, 15)
-	_info_label(list, "The problem: " + story.problem, 17)
+		_info_label(text_col, story.note, 15)
+	_info_label(text_col, "The problem: " + story.problem, 17)
+	for l in text_col.get_children():
+		l.custom_minimum_size.x = 320 if photo_col.get_child_count() > 0 else 530
 
 	var reveal := VBoxContainer.new()
 	reveal.name = "Reveal"
 	reveal.add_theme_constant_override(&"separation", 6)
 	_info_label(reveal, "What NASA did: " + story.did, 17)
+	var pic_row: Dictionary = NasaDb.mission_image(task.id).get("row", {})
+	if not pic_row.is_empty():
+		_info_label(reveal, "About the photo: " + pic_row.relevance, 13)
+		reveal.get_child(-1).name = "PhotoNote"
 	_info_label(reveal, ("You did it: " if review else "Your turn: ") + task.text + ".", 18, true)
 	_nasa_link(reveal, "Read more at NASA", story.url)
 	_info_label(reveal, "This story is real. In MoonMinds, the base, its numbers and Robo are made up.", 13)
@@ -1328,11 +1583,14 @@ func _show_story(task := {}, review := false) -> void:
 	var quiz := VBoxContainer.new()
 	quiz.name = "Quiz"
 	quiz.add_theme_constant_override(&"separation", 6)
-	list.add_child(quiz)
+	# The question sits under the story, outside the scroll, so its ideas are always in view.
+	col.add_child(quiz)
+	col.move_child(quiz, scroll.get_index() + 1)
 	list.add_child(reveal)
 	var open_up := func() -> void:
 		reveal.visible = true
 		actions.visible = true
+		_fit_card.call_deferred(col.get_parent())
 		scroll.ensure_control_visible.call_deferred(reveal)
 	if review or Colony.state.guesses.get(task.id, {}).get("solved", false):
 		quiz.visible = false
@@ -1361,7 +1619,7 @@ func _show_story(task := {}, review := false) -> void:
 		b.pressed.connect(func() -> void:
 			var tries := Colony.record_guess(task.id, opt.correct)
 			if opt.correct:
-				feedback.text = "✓ Yes! That is what NASA did."
+				feedback.text = "✓ Yes! That is what NASA did. +1 star"
 			elif tries >= 2:
 				feedback.text = "Good thinking! NASA's answer: %s." % _correct_option(task.quiz)
 			else:
@@ -1386,15 +1644,14 @@ func _mission_photo(parent: Control, mission_id: StringName) -> void:
 	var tex := TextureRect.new()
 	tex.name = "MissionPhoto"
 	tex.texture = pic.texture
-	tex.custom_minimum_size = Vector2(0, 160)
+	tex.custom_minimum_size = Vector2(200, 140)
 	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	parent.add_child(tex)
 	var row: Dictionary = pic.row
 	var kind: String = row.content_type
-	_info_label(parent, "%s · %s · %s" % [kind.left(1).to_upper() + kind.substr(1), row.credit, row.asset_id], 13)
-	_info_label(parent, row.relevance, 13)
-	parent.get_child(-1).name = "PhotoNote"
+	_info_label(parent, "%s · %s · %s" % [kind.left(1).to_upper() + kind.substr(1), row.credit, row.asset_id], 12)
+	parent.get_child(-1).custom_minimum_size.x = 200
 
 
 ## A link to a NASA page. Kids get a "ask a grown-up" card before the browser opens.

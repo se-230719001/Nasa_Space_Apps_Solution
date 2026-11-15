@@ -98,15 +98,30 @@ func scene_flow() -> void:
 	var heard := []
 	root.get_node("Events").badge_earned.connect(func(id): heard.append(id))
 
+	# --- XP is visible: the star counter on top ---
+	var counter: Label = hud.get_node("%StarCounter").get_node("Stars")
+	check("star counter on screen from the start", hud.get_node("%StarCounter").is_visible_in_tree() and counter.text == "★ 0  Science stars")
+	check("settings button is back", hud.get_node("%SettingsButton").is_visible_in_tree())
+	hud.get_node("%SettingsButton").pressed.emit()
+	await frames()
+	check("settings: tutorial again / new mission / close", "Settings" in card_text() and "Tutorial" in card_text() and "New mission" in card_text())
+	check("the robot steps aside while a card is open", not hud.get_node("%Helper").visible)
+	card().find_child("Choice2", true, false).pressed.emit()  # Close
+	await frames(3)
+	check("and comes back when it closes", hud.get_node("%Helper").visible)
+
 	# --- Day 1 done: debrief asks "why?" (a star either way) ---
 	colony.research(&"rover_blueprint")
+	await frames()
 	check("finishing the mission is a star", R.stars_for(colony.state, &"rover_blueprint") == 1)
+	check("counter goes up with a '+1 ★' pop", counter.text == "★ 1  Science star"
+		and hud.get_children().any(func(n): return n is Label and n.text == "+1 ★"))
 	await create_timer(colony.AUTO_NEXT_DELAY + 0.9).timeout
-	check("debrief has the why-question", "Mission debrief" in card_text() and "One more star: Why does a rover help explorers?" in card_text())
+	check("debrief has the why-question", "What did we learn today?" in card_text() and "Get it right for a star: Why does a rover help explorers?" in card_text())
 	card().find_child("WhyOption1", true, false).pressed.emit()  # the wrong idea
 	await frames()
-	check("wrong idea still earns the star, with the explanation", "Good thinking, +1 star! Here's why:" in card_text()
-		and R.stars_for(colony.state, &"rover_blueprint") == 2)
+	check("wrong idea: no star, but the explanation", "Not quite, no star this time. Here's why:" in card_text()
+		and R.stars_for(colony.state, &"rover_blueprint") == 1)
 	await close_card()
 
 	# --- Milestone decoration (1 of 3 days) ---
@@ -131,12 +146,14 @@ func scene_flow() -> void:
 	await frames()
 	hud.get_node("%Tasks").find_child("LogButton", true, false).pressed.emit()
 	await frames()
-	check("Mission Log page: real event, idea, how you did, stars", "Day 1: Apollo 14 at Cone Crater  ★★☆" in card_text()
+	check("Mission Log page: real event, idea, how you did, stars", "Day 1: Apollo 14 at Cone Crater  ★☆☆" in card_text()
 		and "Idea: Scientists study samples" in card_text() and "You finished it." in card_text())
 	await close_card()
 	hud.get_node("%Tasks").find_child("BadgesButton", true, false).pressed.emit()
 	await frames()
 	check("badge shelf: what's earned and how to earn the rest", "○ Rover Driver: Build the rover and go on a field trip." in card_text())
+	check("every badge has its symbol", card().find_children("Badge_*", "", true, false).size() == R.BADGES.size()
+		and card().find_children("Symbol", "TextureRect", true, false).all(func(t): return t.texture != null))
 	await close_card()
 
 	# --- A badge: Rover Driver after both rover missions ---
@@ -157,5 +174,5 @@ func scene_flow() -> void:
 		await close_card()
 	check("badge card celebrates Rover Driver; Events told the audio side", "New badge: Rover Driver!" in seen and heard.has(&"rover_driver"))
 	check("end card counts stars and badges", "Science stars:" in seen and "Badges:" in seen)
-	check("stars and badges are never lost", Rewards.total_stars(colony.state) >= 4 and colony.state.badges.has(&"rover_driver"))
+	check("stars and badges are never lost", Rewards.total_stars(colony.state) >= 3 and colony.state.badges.has(&"rover_driver"))
 	colony.delete_save()

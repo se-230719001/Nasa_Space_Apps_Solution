@@ -8,19 +8,19 @@ extends RefCounted
 ## state.badges   {badge_id: true}
 ## state.player_placements  how many times the player chose a building's spot
 
-## Science stars per mission: finished it, guessed before seeing NASA's fix
-## (right or wrong), answered the "why did it work?" question (right or wrong).
+## Science stars per mission: finished it, picked NASA's fix yourself (first
+## try or after the hint), answered the "why did it work?" question right.
 const STAR_KINDS := ["done", "guessed", "reflected"]
 
 ## Concept badges: each one stands for a science idea (or for not giving up).
 const BADGES := {
-	&"plant_keeper": {"name": "Plant Keeper", "how": "Finish the greenhouse mission.", "missions": [&"greenhouse"]},
-	&"ice_hunter": {"name": "Ice Hunter", "how": "Finish the ice drill mission.", "missions": [&"ice_drill"]},
-	&"sun_catcher": {"name": "Sun Catcher", "how": "Finish the solar panel mission.", "missions": [&"solar_upgrade"]},
-	&"rover_driver": {"name": "Rover Driver", "how": "Build the rover and go on a field trip.", "missions": [&"rover", &"explore"]},
-	&"storm_watcher": {"name": "Storm Watcher", "how": "Map the radiation and build the shield.", "missions": [&"radiation_map", &"shield"]},
-	&"base_architect": {"name": "Base Architect", "how": "Choose the spot for 3 buildings yourself."},
-	&"never_give_up": {"name": "Never Give Up", "how": "Find an answer after a hint."},
+	&"plant_keeper": {"name": "Plant Keeper", "icon": "icon_food", "how": "Finish the greenhouse mission.", "missions": [&"greenhouse"]},
+	&"ice_hunter": {"name": "Ice Hunter", "icon": "icon_water", "how": "Finish the ice drill mission.", "missions": [&"ice_drill"]},
+	&"sun_catcher": {"name": "Sun Catcher", "icon": "icon_energy", "how": "Finish the solar panel mission.", "missions": [&"solar_upgrade"]},
+	&"rover_driver": {"name": "Rover Driver", "icon": "icon_explore", "how": "Build the rover and go on a field trip.", "missions": [&"rover", &"explore"]},
+	&"storm_watcher": {"name": "Storm Watcher", "icon": "icon_health", "how": "Map the radiation and build the shield.", "missions": [&"radiation_map", &"shield"]},
+	&"base_architect": {"name": "Base Architect", "icon": "icon_build", "how": "Choose the spot for 3 buildings yourself."},
+	&"never_give_up": {"name": "Never Give Up", "icon": "icon_add", "how": "Find an answer after a hint."},
 }
 
 ## Decorations unlocked when a third, two thirds and all of the campaign's days

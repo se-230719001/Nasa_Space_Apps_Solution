@@ -279,17 +279,19 @@ func record_guess(mission_id: StringName, correct: bool) -> int:
 		g.solved = correct or g.tries >= 2
 		g.hint_win = correct and g.tries == 2  # got it after the hint
 		state.guesses[mission_id] = g
-		_star(mission_id, "guessed")  # for guessing at all, right or wrong
+		if correct:
+			_star(mission_id, "guessed")  # only a right pick earns it (1st try or after the hint)
 		_check_rewards()
 		save()
 	Events.prediction_made.emit(correct)
 	return int(g.tries)
 
 
-## The after-mission "why did it work?" answer: a star either way (the card
-## explains if it was wrong). Returns whether it was right.
+## The after-mission "why did it work?" answer: a star only when it's right
+## (a wrong one gets the explanation instead). Returns whether it was right.
 func answer_why(mission_id: StringName, correct: bool) -> bool:
-	_star(mission_id, "reflected")
+	if correct:
+		_star(mission_id, "reflected")
 	_check_rewards()
 	save()
 	return correct

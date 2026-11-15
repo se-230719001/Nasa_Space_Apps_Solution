@@ -90,7 +90,7 @@ func _initialize() -> void:
 	var report: Dictionary = colony.state.history[-1]
 	var food_in := roundi(report.flows[&"food"]["in"]["greenhouse"])
 	var t := modal_text()
-	check("debrief after the night", "Mission debrief" in t)
+	check("debrief after the night", "What did we learn today?" in t)
 	check("debrief: what happened in your base (sim result)", "In your base: food changed by" in t)
 	check("debrief why uses the sim's numbers", ("Greenhouse +%d" % food_in) in t and "Crew −2" in t)
 	check("debrief compares with NASA: same and different", "Like NASA: Plants need light, water and care" in t \

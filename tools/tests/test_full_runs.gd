@@ -76,6 +76,8 @@ func _initialize() -> void:
 	colony.delete_save()
 	change_scene_to_file("res://scenes/main.tscn")
 	await create_timer(2.4).timeout
+	hud().get_node("TitleScreen").find_child("NewButton", true, false).pressed.emit()
+	await frames(3)
 	var index := 0
 	for id in OutpostSimulation.CAMPAIGNS:
 		await play(id, index, index == 0)
@@ -133,7 +135,7 @@ func after_mission(task: Dictionary) -> String:
 	for i in 60:
 		await create_timer(0.15).timeout
 		var t := card_text()
-		if "Mission debrief" in t and card().find_child("WhyOption0", true, false).disabled == false:
+		if "What did we learn today?" in t and card().find_child("WhyOption0", true, false).disabled == false:
 			await press("WhyOption%d" % right_option(task.why.options))
 			await press("Choice0")
 			seen += "debrief,"
@@ -155,8 +157,9 @@ func save_and_continue() -> void:
 	colony.state = colony._fresh_state()
 	reload_current_scene()
 	await create_timer(2.4).timeout
-	check("mid-run: Welcome back offered", await wait_card("Welcome back!"))
-	await press("Choice0")
+	var title: Control = hud().get_node_or_null("TitleScreen")
+	check("mid-run: title screen offers Continue", title != null and title.find_child("ContinueButton", true, false) != null)
+	title.find_child("ContinueButton", true, false).pressed.emit()
 	await create_timer(2.4).timeout
 	check("mid-run: day, parcels, stars and badges restored", colony.state.day == before.day
 		and colony.state.placements == before.placements and colony.state.stars == before.stars
