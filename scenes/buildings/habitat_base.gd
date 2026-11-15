@@ -6,11 +6,24 @@ extends OutpostModule
 
 const K := preload("res://scenes/buildings/building_kit.gd")
 
+var _dish: Node3D
+
+
+func _init() -> void:
+	# The pad is flat: a wide shadow halo around it reads as a drop shadow.
+	shadow_spread = 0.5
+
 
 func _build(root: Node3D) -> void:
 	# Landing pad
-	K.add(root, K.box(Vector3(10.5, 0.12, 7.5)), &"panel", Vector3(-0.4, 0.06, -0.4))
-	K.add(root, K.box(Vector3(10.7, 0.06, 7.7)), &"trim", Vector3(-0.4, 0.03, -0.4))
+	# Pad parts live on the ground's render layer (2) so the rim light, which
+	# skips the ground, doesn't tint them blue either.
+	for part in [
+		K.add(root, K.box(Vector3(10.5, 0.12, 7.5)), &"panel", Vector3(-0.4, 0.06, -0.4)),
+		K.add(root, K.box(Vector3(10.7, 0.06, 7.7)), &"trim", Vector3(-0.4, 0.03, -0.4)),
+	]:
+		part.material_override = K.flat(&"panel" if part.mesh.size.y > 0.1 else &"trim")
+		part.layers = 2
 
 	# Long habitat module along X
 	var hab := Node3D.new()
@@ -41,8 +54,11 @@ func _build(root: Node3D) -> void:
 	K.add(hub, K.torus(1.72, 1.86), &"trim", Vector3(0, 0.1, 0))
 	K.add(hub, K.box(Vector3(0.9, 1.2, 0.2)), &"trim", Vector3(0.7, 0.6, 1.62), Vector3(0, 25, 0))
 	K.add(hub, K.cylinder(0.06, 1.1), &"dark", Vector3(0.2, 3.5, 0.0))
-	K.add(hub, K.cylinder(0.75, 0.25, 32, 0.08), &"frame", Vector3(0.2, 4.1, 0.0), Vector3(-35, 0, 15))
-	K.add(hub, K.sphere(0.12), &"lamp", Vector3(0.2, 4.3, 0.0))
+	_dish = Node3D.new()
+	_dish.position = Vector3(0.2, 4.1, 0.0)
+	hub.add_child(_dish)
+	K.add(_dish, K.cylinder(0.75, 0.25, 32, 0.08), &"frame", Vector3.ZERO, Vector3(-35, 0, 15))
+	K.add(_dish, K.sphere(0.12), &"lamp", Vector3(0, 0.2, 0))
 
 	# Side module along Z, joined by a tunnel
 	var side := Node3D.new()
@@ -60,3 +76,13 @@ func _build(root: Node3D) -> void:
 	# Small lamp post
 	K.add(root, K.cylinder(0.05, 2.2), &"dark", Vector3(4.6, 1.1, 2.6))
 	K.add(root, K.sphere(0.14), &"lamp", Vector3(4.6, 2.25, 2.6))
+
+
+## Idle life: the dish scans, its beacon blinks, windows glow softly.
+func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
+	var t := Time.get_ticks_msec() / 1000.0
+	_dish.rotate_y(delta * 0.4)
+	K.mat(&"lamp").emission_energy_multiplier = 4.0 if fmod(t, 1.6) < 0.2 else 0.5
+	K.mat(&"window").emission_energy_multiplier = 1.8 + sin(t * 1.5) * 0.35

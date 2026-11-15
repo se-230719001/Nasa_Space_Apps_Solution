@@ -11,6 +11,24 @@ uniform vec3 highland_tint : source_color = vec3(0.62, 0.61, 0.62);
 uniform vec3 pad_center = vec3(0.0, 0.0, 0.0);
 uniform float pad_radius = 9.0;
 uniform float relief = 1.0;
+// Play-area framing: the outpost pad reads as a lit, calm "stage"; the land
+// beyond it is dimmer with softer crater shading so it recedes.
+uniform float pad_brightness = 1.05;
+uniform float outer_brightness = 0.75;
+uniform float outer_relief = 0.55;
+// Width of the soft edge between pad and outer land, and a faint rim line on it.
+uniform float pad_edge = 2.5;
+uniform vec3 rim_color : source_color = vec3(0.75, 0.8, 1.0);
+uniform float rim_strength = 0.18;
+// Pad surface: smoothed, compacted regolith with a fine mottled speckle, so
+// the play area reads as prepared ground. Deliberately no grid lines: the grid
+// look is reserved for placement tiles.
+uniform vec3 pad_color : source_color = vec3(0.5, 0.51, 0.6);
+uniform float pad_color_mix = 0.35;
+uniform float speckle_scale = 2.2;
+uniform float speckle_strength = 0.22;
+// How much crater relief survives on the pad (0 = perfectly flat).
+uniform float pad_crater_keep = 0.35;
 
 varying vec3 world_pos;
 
@@ -56,7 +74,10 @@ vec2 craters(vec2 p, float cell, float chance) {
 }
 
 vec2 surface(vec2 p) {
-	float pad = smoothstep(pad_radius, pad_radius + 8.0, length(p - pad_center.xz));
+	// Craters are softened on the pad, not removed: a fully flat pad reads
+	// like paper and the buildings look like they float on it.
+	float pad = mix(pad_crater_keep, 1.0,
+		smoothstep(pad_radius, pad_radius + 8.0, length(p - pad_center.xz)));
 	vec2 c = craters(p, 7.0, 0.4) + craters(p, 20.0, 0.5) + craters(p, 55.0, 0.55);
 	float hills = fbm3(p * 0.025) * 3.0 + fbm3(p * 0.1) * 0.5;
 	return vec2(hills * mix(0.3, 1.0, pad) + c.x * pad, c.y * pad);
@@ -74,7 +95,10 @@ void fragment() {
 	float hx = surface(p + vec2(e, 0.0)).x;
 	float hz = surface(p + vec2(0.0, e)).x;
 	float dist = length(world_pos - CAMERA_POSITION_WORLD);
-	float k = relief * (1.0 - smoothstep(80.0, 300.0, dist));
+	float pad_d = length(p - pad_center.xz);
+	float outside = smoothstep(pad_radius, pad_radius + pad_edge, pad_d);
+	float rim = exp(-pow((pad_d - pad_radius) / 0.35, 2.0)) * rim_strength;
+	float k = relief * (1.0 - smoothstep(80.0, 300.0, dist)) * mix(1.0, outer_relief, outside);
 	vec3 wn = normalize(vec3(-(hx - s0.x) / e * k, 1.0, -(hz - s0.x) / e * k));
 	NORMAL = normalize((VIEW_MATRIX * vec4(wn, 0.0)).xyz);
 
@@ -83,6 +107,10 @@ void fragment() {
 	vec3 col = mix(regolith_dark, regolith_light, smoothstep(0.25, 0.75, tone));
 	col = mix(col, highland_tint, smoothstep(0.6, 0.9, fbm3(p * 0.004 + 7.0)) * 0.5);
 	col = mix(col, highland_tint * 1.08, clamp(s0.y, 0.0, 0.5));
-	ALBEDO = col;
+	float inside = 1.0 - outside;
+	col = mix(col, pad_color, pad_color_mix * inside);
+	float speckle = vnoise(p * speckle_scale) * 0.6 + vnoise(p * speckle_scale * 3.1) * 0.4;
+	col *= 1.0 + (speckle - 0.5) * speckle_strength * inside;
+	ALBEDO = col * mix(pad_brightness, outer_brightness, outside) + rim_color * rim;
 	ROUGHNESS = 1.0;
 }

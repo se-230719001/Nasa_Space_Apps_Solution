@@ -4,7 +4,21 @@ extends RefCounted
 ## Palette follows the style guide (§2.3): white hulls, orange doors/trim,
 ## cyan windows, blue solar panels, transparent greenhouse domes.
 
+const OUTLINE_SHADER := preload("res://scenes/environment/outline.gdshader")
+## Materials drawn without a toon outline: see-through or tiny glowing parts,
+## where a dark shell would show through or clutter the silhouette.
+const NO_OUTLINE: Array[StringName] = [&"glass", &"window", &"water", &"lamp"]
+
 static var _cache := {}
+static var _outline: ShaderMaterial
+
+
+## Shared toon outline pass (style guide: thick dark-navy silhouettes).
+static func outline() -> ShaderMaterial:
+	if _outline == null:
+		_outline = ShaderMaterial.new()
+		_outline.shader = OUTLINE_SHADER
+	return _outline
 
 
 static func mat(id: StringName) -> StandardMaterial3D:
@@ -69,8 +83,22 @@ static func mat(id: StringName) -> StandardMaterial3D:
 			m.emission_enabled = true
 			m.emission = Color("#FFE9B0")
 			m.emission_energy_multiplier = 4.0
+	if id not in NO_OUTLINE:
+		m.next_pass = outline()
 	_cache[id] = m
 	return m
+
+
+## Same material without the outline pass, for parts lying flat on the
+## ground (landing pads): an outline at ground level reads as a gap underneath,
+## making the part look like it floats.
+static func flat(id: StringName) -> StandardMaterial3D:
+	var key := StringName(String(id) + "_flat")
+	if not _cache.has(key):
+		var m: StandardMaterial3D = mat(id).duplicate()
+		m.next_pass = null
+		_cache[key] = m
+	return _cache[key]
 
 
 ## Solar-cell grid texture (white gridlines on blue).

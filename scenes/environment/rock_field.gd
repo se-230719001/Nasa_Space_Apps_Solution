@@ -4,9 +4,10 @@ extends Node3D
 ## Scatters irregular boulders around the outpost (kept off the build area).
 
 const ROCK_SHADER := preload("res://scenes/environment/rock.gdshader")
+const OUTLINE_SHADER := preload("res://scenes/environment/rock_outline.gdshader")
 
 @export var count := 40
-@export var inner_radius := 11.0
+@export var inner_radius := 18.0
 @export var outer_radius := 70.0
 @export var rng_seed := 3
 
@@ -24,7 +25,12 @@ func _ready() -> void:
 		var r := lerpf(inner_radius, outer_radius, pow(rng.randf(), 1.6))
 		var mat := ShaderMaterial.new()
 		mat.shader = ROCK_SHADER
-		mat.set_shader_parameter(&"seed", rng.randf() * 100.0)
+		var rock_seed := rng.randf() * 100.0
+		mat.set_shader_parameter(&"seed", rock_seed)
+		var outline := ShaderMaterial.new()
+		outline.shader = OUTLINE_SHADER
+		outline.set_shader_parameter(&"seed", rock_seed)
+		mat.next_pass = outline
 		var rock := MeshInstance3D.new()
 		rock.mesh = mesh
 		rock.material_override = mat

@@ -1,6 +1,6 @@
 extends Control
 ## Outpost (Base) HUD laid around the 3D colony so the centre stays clear:
-##   top-left   static mission clock        top edge  pull-down resource drawer
+##   top-left   static mission clock        top edge  fixed resource pills
 ##   top-right  settings                    right     slide-in checklist
 ##   bottom-left astronaut helper           bottom-right Search / Explore / Build
 ## Demo flow: BUILD -> "Build Greenhouse?" card -> confirm -> bars animate, the
@@ -8,15 +8,8 @@ extends Control
 
 signal build_confirmed(module_id: StringName)
 
-const MASCOTS := {
-	&"info": preload("res://assets/sprites/mascots/wave.png"),
-	&"warning": preload("res://assets/sprites/mascots/think.png"),
-	&"success": preload("res://assets/sprites/mascots/celebrate.png"),
-}
-const CHECK := preload("res://assets/sprites/icons/check.png")
-const BOX := preload("res://assets/sprites/icons/box.png")
-const CHEVRON_UP := preload("res://assets/sprites/icons/chevron_up.svg")
-const CHEVRON_DOWN := preload("res://assets/sprites/icons/chevron_down.svg")
+const CHECK := preload("res://assets/generated/moonminds/icon_check.png")
+const BOX := preload("res://assets/generated/moonminds/icon_box.png")
 
 ## Greenhouse effect on resources, in percentage points.
 const GREENHOUSE_DELTA := {&"power": -30.0, &"water": -20.0, &"food": 30.0}
@@ -39,11 +32,9 @@ const TOP := 16.0
 const SLIDE_TIME := 0.32
 
 var _greenhouse_built := false
-var _resources_open := true
 var _checklist_open := false
 var _done := {}
 var _task_rows := {}
-var _resource_tween: Tween
 var _checklist_tween: Tween
 
 @onready var _bars := {
@@ -54,7 +45,6 @@ var _checklist_tween: Tween
 }
 @onready var _health: ResourceBar = %Health
 @onready var _popup: Control = %BuildPopup
-@onready var _resource_drawer: Control = %ResourceDrawer
 @onready var _checklist_drawer: Control = %ChecklistDrawer
 
 
@@ -69,10 +59,8 @@ func _ready() -> void:
 	%CloseButton.pressed.connect(_close_build_popup)
 	%CancelButton.pressed.connect(_close_build_popup)
 	%ConfirmButton.pressed.connect(_confirm_build)
-	%ResourceHandle.pressed.connect(toggle_resources)
 	%ChecklistTab.pressed.connect(toggle_checklist)
 	resized.connect(_place_drawers.bind(false))
-	_resource_drawer.resized.connect(_place_drawers.bind(false))
 	_checklist_drawer.resized.connect(_place_drawers.bind(false))
 
 	for key in _bars:
@@ -101,42 +89,25 @@ func _play_splash() -> void:
 
 # --- Drawers ---------------------------------------------------------------
 
-func toggle_resources() -> void:
-	_resources_open = not _resources_open
-	%ResourceHandle.icon = CHEVRON_UP if _resources_open else CHEVRON_DOWN
-	%ResourceHandle.tooltip_text = "Hide resources" if _resources_open else "Show resources"
-	_place_drawers(true)
-
-
 func toggle_checklist() -> void:
 	_checklist_open = not _checklist_open
 	%ChecklistTab.tooltip_text = "Close checklist" if _checklist_open else "Open checklist"
 	_place_drawers(true)
 
 
-## Positions both drawers for their open/closed state. Recomputed on resize so
+## Positions the checklist drawer for its open/closed state. Recomputed on resize so
 ## the layout holds at any window size.
 func _place_drawers(animate: bool) -> void:
-	var res := _resource_drawer
-	res.size = res.get_combined_minimum_size()
-	var res_pos := Vector2(
-		roundf((size.x - res.size.x) / 2.0),
-		TOP if _resources_open else -%ResourcePanel.size.y)
-
 	var list := _checklist_drawer
 	list.size = list.get_combined_minimum_size()
 	var list_pos := Vector2(
 		size.x - list.size.x - MARGIN if _checklist_open else size.x - %ChecklistTab.size.x,
-		TOP + 56.0 + 20.0)  # below the settings button
+		TOP + 56.0 + 28.0)  # below the settings button
 
 	if not animate:
-		res.position = res_pos
 		list.position = list_pos
 		%ChecklistPanel.modulate.a = 1.0 if _checklist_open else 0.0
 		return
-	if _resource_tween:
-		_resource_tween.kill()
-	_resource_tween = _slide(res, res_pos)
 	if _checklist_tween:
 		_checklist_tween.kill()
 	_checklist_tween = _slide(list, list_pos)
@@ -231,6 +202,7 @@ func _confirm_build() -> void:
 		var bar: ResourceBar = _bars[key]
 		targets[key] = clampf(bar.value + GREENHOUSE_DELTA[key], 0.0, 100.0)
 		bar.animate_to(targets[key], _status_for(targets[key]))
+		_show_delta(bar, GREENHOUSE_DELTA[key])
 	complete_task(&"greenhouse")
 	Music.stinger(&"mission_complete")
 	_update_health(targets)
@@ -241,6 +213,36 @@ func _confirm_build() -> void:
 			"Your greenhouse makes more food, but it also uses power. Try adding a solar panel.")
 	else:
 		_say(&"success", "Great balance!", "Your resources are well balanced!")
+
+
+## Bounces a resource pill and pops its change ("+30" / "-20") just below it.
+func _show_delta(bar: ResourceBar, amount: float) -> void:
+	bar.pivot_offset = bar.size / 2
+	bar.scale = Vector2(1.15, 1.15)
+	create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT) \
+		.tween_property(bar, "scale", Vector2.ONE, 0.35)
+	var label := Label.new()
+	label.theme_type_variation = &"HudValue"
+	label.text = "%+d" % amount
+	label.add_theme_color_override(&"font_color", Color("#3CDB56") if amount > 0 else Color("#FF4961"))
+	label.add_theme_font_size_override(&"font_size", 34)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(label)
+	label.size = label.get_combined_minimum_size()  # not laid out until next frame
+	label.pivot_offset = label.size / 2
+	label.global_position = bar.global_position + Vector2((bar.size.x - label.size.x) / 2.0, bar.size.y - 4)
+	# Pop in with a springy overshoot, hold, then drift up while fading.
+	label.scale = Vector2(0.3, 0.3)
+	label.modulate.a = 0.0
+	var t := create_tween()
+	t.tween_property(label, "modulate:a", 1.0, 0.12)
+	t.parallel().tween_property(label, "scale", Vector2.ONE, 0.45) \
+		.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	t.tween_interval(0.9)
+	t.tween_property(label, "position:y", label.position.y - 14, 0.45) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	t.parallel().tween_property(label, "modulate:a", 0.0, 0.45)
+	t.tween_callback(label.queue_free)
 
 
 ## Colony health = the weakest resource ("Are we okay?" at a glance). Uses the
@@ -257,16 +259,7 @@ func _update_health(targets := {}) -> void:
 
 ## Mascot speech: pose + bubble colour + title, so meaning never relies on colour alone.
 func _say(kind: StringName, title: String, text: String) -> void:
-	%Mascot.texture = MASCOTS[kind]
-	%Bubble.theme_type_variation = &"BubbleYellow" if kind == &"warning" else &"BubbleWhite"
-	%BubbleTitle.text = title
-	%BubbleTitle.visible = not title.is_empty()
-	%BubbleText.text = text
-	var bubble: Control = %Bubble
-	bubble.pivot_offset = Vector2(0, bubble.size.y)
-	bubble.scale = Vector2(0.9, 0.9)
-	create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT) \
-		.tween_property(bubble, "scale", Vector2.ONE, 0.25)
+	%Helper.say(kind, title, text)
 
 
 static func _status_for(value: float) -> ResourceBar.Status:

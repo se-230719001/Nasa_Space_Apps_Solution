@@ -1,77 +1,40 @@
 [gd_scene format=3]
 
-[ext_resource type="Theme" path="res://ui/theme/moonminds_sprite_theme.tres" id="theme"]
 [ext_resource type="Script" path="res://ui/screens/outpost_hud.gd" id="script"]
-[ext_resource type="Script" path="res://ui/components/sprite_button.gd" id="sprite_button"]
 [ext_resource type="PackedScene" path="res://ui/components/resource_bar.tscn" id="bar"]
 [ext_resource type="PackedScene" path="res://ui/components/time_display.tscn" id="time"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/heart.svg" id="i_heart"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/food.png" id="i_food"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/water.png" id="i_water"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/power.png" id="i_power"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/o2.svg" id="i_o2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/chevron_up.svg" id="i_chev_up"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/checklist.svg" id="i_checklist"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/search.svg" id="i_search"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/explore.svg" id="i_explore"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/build.svg" id="i_build"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/settings.png" id="i_settings"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/add.png" id="i_add"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/remove.png" id="i_remove"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/info.png" id="i_info"]
-[ext_resource type="Texture2D" path="res://assets/sprites/mascots/wave.png" id="m_wave"]
-[ext_resource type="Texture2D" path="res://assets/sprites/buildings/greenhouse.png" id="b_greenhouse"]
-[ext_resource type="Texture2D" path="res://assets/sprites/buttons/build.png" id="btn_build"]
-[ext_resource type="Texture2D" path="res://assets/sprites/buttons/cancel.png" id="btn_cancel"]
-[ext_resource type="Texture2D" path="res://assets/sprites/brand/logo.png" id="logo"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_health.png" id="i_heart"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_food.png" id="i_food"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_water.png" id="i_water"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_energy.png" id="i_power"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_oxygen.png" id="i_o2"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_checklist.png" id="i_checklist"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_search.png" id="i_search"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_explore.png" id="i_explore"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_build.png" id="i_build"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_settings.png" id="i_settings"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_add.png" id="i_add"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_remove.png" id="i_remove"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_info.png" id="i_info"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/mascot_wave.png" id="m_wave"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/building_greenhouse.png" id="b_greenhouse"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/logo_moonminds.png" id="logo"]
+[ext_resource type="Material" path="res://ui/theme/sticker.tres" id="sticker"]
+[ext_resource type="Script" path="res://ui/components/mascot_helper.gd" id="mascot_helper"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_close.png" id="i_close"]
 
-[sub_resource type="StyleBoxFlat" id="glass"]
-content_margin_left = 18.0
-content_margin_top = 10.0
-content_margin_right = 18.0
-content_margin_bottom = 10.0
-bg_color = Color(0.102, 0.1216, 0.2824, 0.78)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.2471, 0.2941, 0.6706, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-anti_aliasing = true
-
-[sub_resource type="StyleBoxFlat" id="handle_n"]
-content_margin_left = 22.0
-content_margin_top = 0.0
-content_margin_right = 22.0
-content_margin_bottom = 2.0
-bg_color = Color(0.2471, 0.2941, 0.6706, 0.92)
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
-anti_aliasing = true
-
-[sub_resource type="StyleBoxFlat" id="handle_h"]
-content_margin_left = 22.0
-content_margin_top = 0.0
-content_margin_right = 22.0
-content_margin_bottom = 2.0
-bg_color = Color(0.3098, 0.4196, 1, 1)
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
-anti_aliasing = true
+[sub_resource type="StyleBoxEmpty" id="empty"]
 
 [sub_resource type="StyleBoxFlat" id="tab_n"]
 content_margin_left = 8.0
 content_margin_top = 10.0
 content_margin_right = 8.0
 content_margin_bottom = 8.0
-bg_color = Color(0.102, 0.1216, 0.2824, 0.85)
-border_width_left = 3
-border_width_top = 3
-border_width_bottom = 3
-border_color = Color(0.2471, 0.2941, 0.6706, 1)
+bg_color = Color(0.102, 0.1216, 0.2824, 0.92)
+border_width_left = 4
+border_width_top = 4
+border_width_bottom = 8
+border_color = Color(0.04314, 0.07059, 0.2118, 1)
 corner_radius_top_left = 18
 corner_radius_bottom_left = 18
 anti_aliasing = true
@@ -82,10 +45,10 @@ content_margin_top = 10.0
 content_margin_right = 8.0
 content_margin_bottom = 8.0
 bg_color = Color(0.1569, 0.1843, 0.4196, 0.95)
-border_width_left = 3
-border_width_top = 3
-border_width_bottom = 3
-border_color = Color(0.4157, 0.5098, 1, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_bottom = 8
+border_color = Color(0.04314, 0.07059, 0.2118, 1)
 corner_radius_top_left = 18
 corner_radius_bottom_left = 18
 anti_aliasing = true
@@ -95,12 +58,12 @@ content_margin_left = 18.0
 content_margin_top = 12.0
 content_margin_right = 18.0
 content_margin_bottom = 16.0
-bg_color = Color(0.102, 0.1216, 0.2824, 0.85)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.2471, 0.2941, 0.6706, 1)
+bg_color = Color(0.102, 0.1216, 0.2824, 0.92)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 8
+border_color = Color(0.04314, 0.07059, 0.2118, 1)
 corner_radius_top_left = 4
 corner_radius_top_right = 20
 corner_radius_bottom_right = 20
@@ -115,7 +78,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme = ExtResource("theme")
 script = ExtResource("script")
 
 [node name="TimeDisplay" parent="." instance=ExtResource("time")]
@@ -126,100 +88,74 @@ offset_top = 16.0
 offset_right = 184.0
 offset_bottom = 72.0
 
-[node name="ResourceDrawer" type="VBoxContainer" parent="."]
-unique_name_in_owner = true
-layout_mode = 0
-offset_right = 830.0
-offset_bottom = 104.0
+[node name="Resources" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_top = 18.0
+offset_left = 40.0
+offset_right = 40.0
+grow_horizontal = 2
 mouse_filter = 2
-theme_override_constants/separation = 0
+theme_override_constants/separation = 6
 
-[node name="ResourcePanel" type="PanelContainer" parent="ResourceDrawer"]
+[node name="Health" parent="Resources" instance=ExtResource("bar")]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_styles/panel = SubResource("glass")
-
-[node name="Resources" type="HBoxContainer" parent="ResourceDrawer/ResourcePanel"]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="Health" parent="ResourceDrawer/ResourcePanel/Resources" instance=ExtResource("bar")]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(146, 48)
-layout_mode = 2
-size_flags_horizontal = 3
 resource_name = "Health"
 icon = ExtResource("i_heart")
 value = 45.0
 display_text = "Good"
 
-[node name="Food" parent="ResourceDrawer/ResourcePanel/Resources" instance=ExtResource("bar")]
+[node name="Food" parent="Resources" instance=ExtResource("bar")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(146, 48)
 layout_mode = 2
-size_flags_horizontal = 3
 resource_name = "Food"
 icon = ExtResource("i_food")
 value = 45.0
 
-[node name="Water" parent="ResourceDrawer/ResourcePanel/Resources" instance=ExtResource("bar")]
+[node name="Water" parent="Resources" instance=ExtResource("bar")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(146, 48)
 layout_mode = 2
-size_flags_horizontal = 3
 resource_name = "Water"
 icon = ExtResource("i_water")
 value = 65.0
 healthy_variation = &"BarWater"
 
-[node name="Power" parent="ResourceDrawer/ResourcePanel/Resources" instance=ExtResource("bar")]
+[node name="Power" parent="Resources" instance=ExtResource("bar")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(146, 48)
 layout_mode = 2
-size_flags_horizontal = 3
 resource_name = "Energy"
 icon = ExtResource("i_power")
 value = 70.0
 
-[node name="Oxygen" parent="ResourceDrawer/ResourcePanel/Resources" instance=ExtResource("bar")]
+[node name="Oxygen" parent="Resources" instance=ExtResource("bar")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(146, 48)
 layout_mode = 2
-size_flags_horizontal = 3
 resource_name = "Oxygen"
 icon = ExtResource("i_o2")
 value = 80.0
 healthy_variation = &"BarWater"
 
-[node name="ResourceHandle" type="Button" parent="ResourceDrawer"]
+[node name="SettingsButton" type="Button" parent="."]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(96, 30)
-layout_mode = 2
-size_flags_horizontal = 4
-tooltip_text = "Hide resources"
-mouse_default_cursor_shape = 2
-theme_override_constants/icon_max_width = 22
-theme_override_styles/normal = SubResource("handle_n")
-theme_override_styles/hover = SubResource("handle_h")
-theme_override_styles/pressed = SubResource("handle_h")
-icon = ExtResource("i_chev_up")
-icon_alignment = 1
-
-[node name="SettingsButton" type="TextureButton" parent="."]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(56, 56)
+custom_minimum_size = Vector2(64, 64)
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -80.0
-offset_top = 16.0
+offset_left = -88.0
+offset_top = 14.0
 offset_right = -24.0
-offset_bottom = 72.0
+offset_bottom = 78.0
 grow_horizontal = 0
 tooltip_text = "Settings"
-texture_normal = ExtResource("i_settings")
-script = ExtResource("sprite_button")
+mouse_default_cursor_shape = 2
+theme_type_variation = &"IconButton"
+theme_override_constants/icon_max_width = 40
+icon = ExtResource("i_settings")
+icon_alignment = 1
 
 [node name="ChecklistDrawer" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
@@ -238,8 +174,8 @@ size_flags_vertical = 0
 tooltip_text = "Open checklist"
 mouse_default_cursor_shape = 2
 theme_override_constants/icon_max_width = 36
-theme_override_font_sizes/font_size = 15
-theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 20
+theme_override_constants/outline_size = 6
 theme_override_styles/normal = SubResource("tab_n")
 theme_override_styles/hover = SubResource("tab_h")
 theme_override_styles/pressed = SubResource("tab_h")
@@ -250,7 +186,7 @@ vertical_icon_alignment = 0
 
 [node name="ChecklistPanel" type="PanelContainer" parent="ChecklistDrawer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(340, 0)
 layout_mode = 2
 size_flags_vertical = 0
 theme_override_styles/panel = SubResource("checklist_sb")
@@ -269,27 +205,69 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Helper" type="VBoxContainer" parent="."]
-custom_minimum_size = Vector2(300, 0)
+[node name="Helper" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(460, 0)
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 24.0
-offset_top = -16.0
-offset_right = 324.0
-offset_bottom = -16.0
+offset_top = -20.0
+offset_right = 484.0
+offset_bottom = -20.0
 grow_vertical = 0
 mouse_filter = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = -34
+script = ExtResource("mascot_helper")
+
+[node name="Portrait" type="Control" parent="Helper"]
+z_index = 1
+custom_minimum_size = Vector2(136, 136)
+layout_mode = 2
+size_flags_vertical = 8
+mouse_filter = 2
+
+[node name="Ring" type="Panel" parent="Helper/Portrait"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"PortraitRing"
+
+[node name="Mascot" type="TextureRect" parent="Helper/Portrait"]
+unique_name_in_owner = true
+material = ExtResource("sticker")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -8.0
+offset_top = -40.0
+offset_right = 8.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+tooltip_text = "Your astronaut helper"
+texture = ExtResource("m_wave")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Bubble" type="PanelContainer" parent="Helper"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
-theme_type_variation = &"BubbleWhite"
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"DialogCard"
 
 [node name="Content" type="VBoxContainer" parent="Helper/Bubble"]
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_constants/separation = 2
 
 [node name="BubbleTitle" type="Label" parent="Helper/Bubble/Content"]
@@ -305,16 +283,6 @@ theme_type_variation = &"DarkBody"
 text = "Let's build a Greenhouse to produce food!"
 autowrap_mode = 3
 
-[node name="Mascot" type="TextureRect" parent="Helper"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(120, 120)
-layout_mode = 2
-size_flags_horizontal = 0
-tooltip_text = "Your astronaut helper"
-texture = ExtResource("m_wave")
-expand_mode = 1
-stretch_mode = 5
-
 [node name="ActionButtons" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 3
@@ -322,65 +290,100 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -224.0
-offset_top = -220.0
+offset_left = -24.0
+offset_top = -24.0
 offset_right = -24.0
-offset_bottom = -16.0
+offset_bottom = -24.0
 grow_horizontal = 0
 grow_vertical = 0
 mouse_filter = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 14
 alignment = 2
 
-[node name="SearchButton" type="Button" parent="ActionButtons"]
+[node name="Secondary" type="HBoxContainer" parent="ActionButtons"]
+layout_mode = 2
+size_flags_horizontal = 8
+mouse_filter = 2
+theme_override_constants/separation = 14
+
+[node name="SearchButton" type="Button" parent="ActionButtons/Secondary"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 60)
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 tooltip_text = "Research technology"
 mouse_default_cursor_shape = 2
-theme_override_constants/icon_max_width = 34
+theme_override_constants/icon_max_width = 46
+theme_override_constants/h_separation = 2
+theme_override_font_sizes/font_size = 18
 text = "Search"
 icon = ExtResource("i_search")
+icon_alignment = 1
+vertical_icon_alignment = 0
 
-[node name="ExploreButton" type="Button" parent="ActionButtons"]
+[node name="ExploreButton" type="Button" parent="ActionButtons/Secondary"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 60)
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 tooltip_text = "Explore space"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"IconButton"
-theme_override_constants/icon_max_width = 34
+theme_override_constants/icon_max_width = 46
+theme_override_constants/h_separation = 2
+theme_override_font_sizes/font_size = 18
 text = "Explore"
 icon = ExtResource("i_explore")
+icon_alignment = 1
+vertical_icon_alignment = 0
 
 [node name="BuildButton" type="Button" parent="ActionButtons"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 60)
+custom_minimum_size = Vector2(214, 84)
 layout_mode = 2
+size_flags_horizontal = 8
 tooltip_text = "Build a module"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"PrimaryButton"
-theme_override_constants/icon_max_width = 34
+theme_override_constants/icon_max_width = 44
+theme_override_font_sizes/font_size = 32
 text = "Build"
 icon = ExtResource("i_build")
 
 [node name="BuildPopup" type="Control" parent="."]
 unique_name_in_owner = true
 visible = false
+z_index = 5
 layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
+anchors_preset = 15
 anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -588.0
-offset_top = -220.0
-offset_right = -248.0
-offset_bottom = 220.0
-grow_horizontal = 0
+anchor_bottom = 1.0
+grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Card" type="PanelContainer" parent="BuildPopup"]
+[node name="Dim" type="ColorRect" parent="BuildPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.1, 0.5)
+
+[node name="Frame" type="Control" parent="BuildPopup"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -205.0
+offset_top = -215.0
+offset_right = 205.0
+offset_bottom = 215.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Card" type="PanelContainer" parent="BuildPopup/Frame"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -389,37 +392,38 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_type_variation = &"PopupCard"
 
-[node name="Content" type="VBoxContainer" parent="BuildPopup/Card"]
+[node name="Content" type="VBoxContainer" parent="BuildPopup/Frame/Card"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Title" type="Label" parent="BuildPopup/Card/Content"]
+[node name="Title" type="Label" parent="BuildPopup/Frame/Card/Content"]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 theme_type_variation = &"H2"
 text = "Build Greenhouse?"
 vertical_alignment = 1
 
-[node name="Illustration" type="TextureRect" parent="BuildPopup/Card/Content"]
+[node name="Illustration" type="TextureRect" parent="BuildPopup/Frame/Card/Content"]
+material = ExtResource("sticker")
 custom_minimum_size = Vector2(0, 110)
 layout_mode = 2
 texture = ExtResource("b_greenhouse")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Effects" type="PanelContainer" parent="BuildPopup/Card/Content"]
+[node name="Effects" type="PanelContainer" parent="BuildPopup/Frame/Card/Content"]
 layout_mode = 2
 theme_type_variation = &"TagPanel"
 
-[node name="Rows" type="VBoxContainer" parent="BuildPopup/Card/Content/Effects"]
+[node name="Rows" type="VBoxContainer" parent="BuildPopup/Frame/Card/Content/Effects"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Uses" type="HBoxContainer" parent="BuildPopup/Card/Content/Effects/Rows"]
+[node name="Uses" type="HBoxContainer" parent="BuildPopup/Frame/Card/Content/Effects/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Mark" type="TextureRect" parent="BuildPopup/Card/Content/Effects/Rows/Uses"]
+[node name="Mark" type="TextureRect" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Uses"]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 size_flags_vertical = 4
@@ -427,13 +431,13 @@ texture = ExtResource("i_remove")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="BuildPopup/Card/Content/Effects/Rows/Uses"]
+[node name="Label" type="Label" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Uses"]
 custom_minimum_size = Vector2(104, 0)
 layout_mode = 2
 theme_type_variation = &"DarkCaption"
 text = "Will Use:"
 
-[node name="Water" type="TextureRect" parent="BuildPopup/Card/Content/Effects/Rows/Uses"]
+[node name="Water" type="TextureRect" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Uses"]
 custom_minimum_size = Vector2(26, 26)
 layout_mode = 2
 size_flags_vertical = 4
@@ -441,7 +445,7 @@ texture = ExtResource("i_water")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Power" type="TextureRect" parent="BuildPopup/Card/Content/Effects/Rows/Uses"]
+[node name="Power" type="TextureRect" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Uses"]
 custom_minimum_size = Vector2(26, 26)
 layout_mode = 2
 size_flags_vertical = 4
@@ -449,16 +453,16 @@ texture = ExtResource("i_power")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Value" type="Label" parent="BuildPopup/Card/Content/Effects/Rows/Uses"]
+[node name="Value" type="Label" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Uses"]
 layout_mode = 2
 theme_type_variation = &"DarkCaption"
 text = "Water, Power"
 
-[node name="Improves" type="HBoxContainer" parent="BuildPopup/Card/Content/Effects/Rows"]
+[node name="Improves" type="HBoxContainer" parent="BuildPopup/Frame/Card/Content/Effects/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Mark" type="TextureRect" parent="BuildPopup/Card/Content/Effects/Rows/Improves"]
+[node name="Mark" type="TextureRect" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Improves"]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 size_flags_vertical = 4
@@ -466,13 +470,13 @@ texture = ExtResource("i_add")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="BuildPopup/Card/Content/Effects/Rows/Improves"]
+[node name="Label" type="Label" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Improves"]
 custom_minimum_size = Vector2(104, 0)
 layout_mode = 2
 theme_type_variation = &"DarkCaption"
 text = "Will Improve:"
 
-[node name="Food" type="TextureRect" parent="BuildPopup/Card/Content/Effects/Rows/Improves"]
+[node name="Food" type="TextureRect" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Improves"]
 custom_minimum_size = Vector2(26, 26)
 layout_mode = 2
 size_flags_vertical = 4
@@ -480,16 +484,16 @@ texture = ExtResource("i_food")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Value" type="Label" parent="BuildPopup/Card/Content/Effects/Rows/Improves"]
+[node name="Value" type="Label" parent="BuildPopup/Frame/Card/Content/Effects/Rows/Improves"]
 layout_mode = 2
 theme_type_variation = &"DarkCaption"
 text = "More food"
 
-[node name="TradeOff" type="HBoxContainer" parent="BuildPopup/Card/Content/Effects/Rows"]
+[node name="TradeOff" type="HBoxContainer" parent="BuildPopup/Frame/Card/Content/Effects/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Mark" type="TextureRect" parent="BuildPopup/Card/Content/Effects/Rows/TradeOff"]
+[node name="Mark" type="TextureRect" parent="BuildPopup/Frame/Card/Content/Effects/Rows/TradeOff"]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 size_flags_vertical = 4
@@ -497,62 +501,74 @@ texture = ExtResource("i_info")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="BuildPopup/Card/Content/Effects/Rows/TradeOff"]
+[node name="Label" type="Label" parent="BuildPopup/Frame/Card/Content/Effects/Rows/TradeOff"]
 custom_minimum_size = Vector2(104, 0)
 layout_mode = 2
 theme_type_variation = &"DarkCaption"
 text = "Trade-off:"
 
-[node name="Value" type="Label" parent="BuildPopup/Card/Content/Effects/Rows/TradeOff"]
+[node name="Value" type="Label" parent="BuildPopup/Frame/Card/Content/Effects/Rows/TradeOff"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"DarkCaption"
 text = "Higher water use"
 autowrap_mode = 3
 
-[node name="Explanation" type="Label" parent="BuildPopup/Card/Content"]
+[node name="Explanation" type="Label" parent="BuildPopup/Frame/Card/Content"]
 layout_mode = 2
 theme_type_variation = &"Caption"
 text = "A greenhouse grows food, but it needs water and power."
 autowrap_mode = 3
 
-[node name="Actions" type="HBoxContainer" parent="BuildPopup/Card/Content"]
+[node name="Actions" type="HBoxContainer" parent="BuildPopup/Frame/Card/Content"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="CancelButton" type="TextureButton" parent="BuildPopup/Card/Content/Actions"]
+[node name="CancelButton" type="Button" parent="BuildPopup/Frame/Card/Content/Actions"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "Cancel"
-texture_normal = ExtResource("btn_cancel")
-script = ExtResource("sprite_button")
+mouse_default_cursor_shape = 2
+theme_type_variation = &"DangerButton"
+text = "Cancel"
 
-[node name="ConfirmButton" type="TextureButton" parent="BuildPopup/Card/Content/Actions"]
+[node name="ConfirmButton" type="Button" parent="BuildPopup/Frame/Card/Content/Actions"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "Build the greenhouse"
-texture_normal = ExtResource("btn_build")
-script = ExtResource("sprite_button")
+mouse_default_cursor_shape = 2
+theme_type_variation = &"PrimaryButton"
+text = "Build"
 
-[node name="CloseButton" type="Button" parent="BuildPopup"]
+[node name="CloseButton" type="Button" parent="BuildPopup/Frame"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -48.0
-offset_bottom = 48.0
+offset_left = -42.0
+offset_top = -20.0
+offset_right = 18.0
+offset_bottom = 40.0
 grow_horizontal = 0
 tooltip_text = "Close"
 mouse_default_cursor_shape = 2
-flat = true
+theme_override_constants/icon_max_width = 60
+theme_override_styles/normal = SubResource("empty")
+theme_override_styles/hover = SubResource("empty")
+theme_override_styles/pressed = SubResource("empty")
+theme_override_styles/focus = SubResource("empty")
+icon = ExtResource("i_close")
+icon_alignment = 1
+expand_icon = true
 
 [node name="Splash" type="ColorRect" parent="."]
 unique_name_in_owner = true
+z_index = 10
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

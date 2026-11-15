@@ -1,59 +1,72 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://ui/components/resource_bar.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/sprites/icons/power.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/generated/moonminds/icon_energy.png" id="2"]
+[ext_resource type="Material" path="res://ui/theme/sticker.tres" id="sticker"]
 
 [node name="ResourceBar" type="HBoxContainer"]
-custom_minimum_size = Vector2(176, 48)
-theme_override_constants/separation = 8
+theme_override_constants/separation = -20
 script = ExtResource("1")
 icon = ExtResource("2")
 
 [node name="Icon" type="TextureRect" parent="."]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(36, 36)
+material = ExtResource("sticker")
+z_index = 1
+custom_minimum_size = Vector2(52, 52)
 layout_mode = 2
 size_flags_vertical = 4
+mouse_filter = 2
 texture = ExtResource("2")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Column" type="VBoxContainer" parent="."]
+[node name="Pill" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
-size_flags_horizontal = 3
 size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"HudPill"
+
+[node name="Column" type="VBoxContainer" parent="Pill"]
+layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 2
 
-[node name="Header" type="HBoxContainer" parent="Column"]
+[node name="Header" type="HBoxContainer" parent="Pill/Column"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 4
+alignment = 1
 
-[node name="Name" type="Label" parent="Column/Header"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"HudLabel"
-text = "Power"
-
-[node name="StatusIcon" type="TextureRect" parent="Column/Header"]
+[node name="Name" type="Label" parent="Pill/Column/Header"]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
+text = "Power"
+
+[node name="StatusIcon" type="TextureRect" parent="Pill/Column/Header"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Value" type="Label" parent="Column/Header"]
+[node name="Value" type="Label" parent="Pill/Column/Header"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"HudLabel"
+theme_type_variation = &"HudValue"
 text = "70%"
-horizontal_alignment = 2
+horizontal_alignment = 1
 
-[node name="Bar" type="ProgressBar" parent="Column"]
+[node name="Bar" type="ProgressBar" parent="Pill/Column"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 16)
+custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
+mouse_filter = 2
 theme_type_variation = &"BarHealthy"
 value = 70.0
 show_percentage = false

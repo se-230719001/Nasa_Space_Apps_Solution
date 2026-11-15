@@ -21,8 +21,8 @@ Music="*res://scenes/audio/music_director.gd"
 
 [display]
 
-window/size/viewport_width=1280
-window/size/viewport_height=720
+window/size/viewport_width=1024
+window/size/viewport_height=576
 window/size/mode=3
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
@@ -41,6 +41,9 @@ theme/custom="res://ui/theme/moonminds_theme.tres"
 3d/physics_engine="Jolt Physics"
 
 [rendering]
+
+# Large source art is drawn small in the HUD: mipmaps keep it smooth.
+textures/canvas_textures/default_texture_filter=3
 
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"

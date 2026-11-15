@@ -7,8 +7,8 @@ extends HBoxContainer
 enum Status { HEALTHY, WARNING, CRITICAL }
 
 const STATUS_ICONS := {
-	Status.WARNING: preload("res://assets/sprites/icons/warning.png"),
-	Status.CRITICAL: preload("res://assets/sprites/icons/critical.png"),
+	Status.WARNING: preload("res://assets/generated/moonminds/icon_warning.png"),
+	Status.CRITICAL: preload("res://assets/generated/moonminds/icon_critical.png"),
 }
 
 @export var resource_name := "Power":
