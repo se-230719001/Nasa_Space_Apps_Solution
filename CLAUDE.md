@@ -48,6 +48,8 @@ Rules for `events.gd`:
 ## Running and verifying
 
 - Godot binary differs per machine (one setup: `~/Downloads/Godot.app/Contents/MacOS/Godot`).
+- Fresh clone / after a pull with new art: import once with `<godot> --headless --path . --import`
+  (or open the editor). Without it textures and fonts fail to load (e.g. no title wallpaper).
 - Run the game: `<godot> --path .` (leave it open for the person to try after a change).
 - Headless self-check: write a throwaway `extends SceneTree` script outside the repo that loads
   `res://scenes/main.tscn`, drives it, prints pass/fail, then
