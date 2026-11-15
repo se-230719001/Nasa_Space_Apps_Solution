@@ -4,9 +4,9 @@ extends OutpostModule
 ## Two rows of tilted solar panels on struts.
 
 const K := preload("res://scenes/buildings/building_kit.gd")
-@export var columns := 3:
+@export_range(1, 3) var level := 1:
 	set(v):
-		columns = v
+		level = v
 		if is_inside_tree():
 			rebuild()
 
@@ -16,6 +16,7 @@ var _panels: Array[Node3D] = []
 
 func _build(root: Node3D) -> void:
 	_panels.clear()
+	var columns := 2 + level
 	for row in 2:
 		for col in columns:
 			var p := Vector3((col - (columns - 1) / 2.0) * 1.25, 0, row * 1.7 - 0.85)

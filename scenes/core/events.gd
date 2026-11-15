@@ -28,3 +28,19 @@ signal mascot_said(kind: StringName)
 signal mascot_typed
 ## The mission ended: all goals done with the crew alive (won) or crew health hit 0.
 signal mission_ended(won: bool)
+## The player chose how long to play this sitting (&"short", &"medium", &"long").
+signal session_started(length: StringName)
+## A new mission day began (its daily mission is now shown).
+signal mission_day_started(day: int)
+## After a mission night: was the player's guess about the change right?
+signal prediction_made(correct: bool)
+## The helper gave a hint (1 = small nudge, 2 = clear next step).
+signal hint_shown(level: int)
+## Crew health hit 0; Mission Control helped and the day starts again.
+signal crew_rescued
+## The player picked a training campaign (&"apollo", &"base", &"full").
+signal campaign_started(campaign: StringName)
+## Stage 8 rewards: a science star, a concept badge, a base decoration unlocked.
+signal star_earned(mission_id: StringName)
+signal badge_earned(badge_id: StringName)
+signal decor_unlocked(decor_id: StringName)

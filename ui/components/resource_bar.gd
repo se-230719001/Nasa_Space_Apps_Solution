@@ -6,6 +6,9 @@ extends HBoxContainer
 
 enum Status { HEALTHY, WARNING, CRITICAL }
 
+## Tapped/clicked: the HUD opens the exact numbers (the pill itself shows a word).
+signal pressed
+
 const STATUS_ICONS := {
 	Status.WARNING: preload("res://assets/generated/moonminds/icon_warning.png"),
 	Status.CRITICAL: preload("res://assets/generated/moonminds/icon_critical.png"),
@@ -46,7 +49,16 @@ const STATUS_ICONS := {
 
 
 func _ready() -> void:
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_refresh()
+
+
+func _gui_input(event: InputEvent) -> void:
+	var tap: bool = event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed
+	if tap or (event is InputEventScreenTouch and event.pressed):
+		pressed.emit()
+		accept_event()
 
 
 ## Animates the bar to a new value (style guide §10.4: don't change silently).
@@ -73,4 +85,4 @@ func _refresh() -> void:
 	_status_icon.visible = status != Status.HEALTHY
 	var shown := display_text if not display_text.is_empty() else "%d%%" % roundi(value)
 	_value_label.text = shown
-	tooltip_text = "%s: %s" % [resource_name, shown]
+	tooltip_text = "%s: %d of 100 (tap for details)" % [resource_name, roundi(value)]

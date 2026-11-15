@@ -97,12 +97,12 @@ offset_left = 24.0
 offset_top = 86.0
 offset_right = 184.0
 offset_bottom = 138.0
-tooltip_text = "End the day and see what happens"
+tooltip_text = "Wait one night: the crew uses supplies, Mission Control sends 1 kit"
 mouse_default_cursor_shape = 2
 theme_type_variation = &"IconButton"
 theme_override_constants/icon_max_width = 26
 theme_override_font_sizes/font_size = 18
-text = "Next Day"
+text = "Wait"
 icon = ExtResource("i_clock")
 
 [node name="Resources" type="HBoxContainer" parent="."]
@@ -196,7 +196,7 @@ theme_override_constants/outline_size = 6
 theme_override_styles/normal = SubResource("tab_n")
 theme_override_styles/hover = SubResource("tab_h")
 theme_override_styles/pressed = SubResource("tab_h")
-text = "0/4"
+text = "0/1"
 icon = ExtResource("i_checklist")
 icon_alignment = 1
 vertical_icon_alignment = 0
@@ -215,7 +215,7 @@ theme_override_constants/separation = 12
 [node name="Title" type="Label" parent="ChecklistDrawer/ChecklistPanel/Content"]
 layout_mode = 2
 theme_type_variation = &"H2"
-text = "Checklist"
+text = "Mission Days"
 
 [node name="Tasks" type="VBoxContainer" parent="ChecklistDrawer/ChecklistPanel/Content"]
 unique_name_in_owner = true
@@ -297,7 +297,7 @@ theme_type_variation = &"DarkTitle"
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"DarkBody"
-text = "Let's build a Greenhouse to produce food!"
+text = "Hi! I'm Robo, your mission helper."
 autowrap_mode = 3
 
 [node name="ActionButtons" type="VBoxContainer" parent="."]
@@ -332,7 +332,7 @@ mouse_default_cursor_shape = 2
 theme_override_constants/icon_max_width = 46
 theme_override_constants/h_separation = 2
 theme_override_font_sizes/font_size = 18
-text = "Search"
+text = "Research"
 icon = ExtResource("i_search")
 icon_alignment = 1
 vertical_icon_alignment = 0

@@ -5,6 +5,12 @@ extends OutpostModule
 
 const K := preload("res://scenes/buildings/building_kit.gd")
 
+@export_range(1, 3) var level := 1:
+	set(v):
+		level = v
+		if is_inside_tree():
+			rebuild()
+
 
 func _build(root: Node3D) -> void:
 	for a in 3:
@@ -12,7 +18,10 @@ func _build(root: Node3D) -> void:
 		K.add(root, K.box(Vector3(0.18, 0.6, 0.18)), &"dark", Vector3(cos(ang) * 0.55, 0.3, sin(ang) * 0.55))
 	K.add(root, K.cylinder(0.85, 1.7, 40), &"hull", Vector3(0, 1.45, 0))
 	K.add(root, K.sphere(0.85, true, 40), &"hull", Vector3(0, 2.3, 0))
-	K.add(root, K.cylinder(0.87, 0.75, 40), &"water", Vector3(0, 1.3, 0))
+	var h := 0.5 + level * 0.4
+	K.add(root, K.cylinder(0.87, h, 40), &"water", Vector3(0, 0.6 + h / 2.0, 0))
+	for i in level - 1:
+		K.add(root, K.torus(0.86, 0.98), &"trim", Vector3(0, 1.2 + i * 0.55, 0))
 	K.add(root, K.torus(0.83, 0.95), &"trim", Vector3(0, 0.62, 0))
 	K.add(root, K.torus(0.83, 0.95), &"trim", Vector3(0, 2.28, 0))
 	K.add(root, K.cylinder(0.12, 0.3), &"dark", Vector3(0, 3.25, 0))

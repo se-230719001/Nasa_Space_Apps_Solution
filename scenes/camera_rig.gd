@@ -29,7 +29,16 @@ func _ready() -> void:
 	_offset = global_position - _focus
 
 
+## While a building is being placed, one-finger / left drags move the
+## building, not the camera (zooming still works).
+var input_locked := false
+
+
 func _unhandled_input(event: InputEvent) -> void:
+	if input_locked and (event is InputEventMouseMotion \
+			or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT)):
+		_dragging = false
+		return
 	if event is InputEventScreenTouch:
 		if event.pressed:
 			_touches[event.index] = event.position
