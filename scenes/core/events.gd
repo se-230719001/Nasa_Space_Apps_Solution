@@ -26,3 +26,5 @@ signal task_completed(task_id: StringName)
 signal mascot_said(kind: StringName)
 ## The mascot typed another letter or two of its message (typewriter beat).
 signal mascot_typed
+## The mission ended: all goals done with the crew alive (won) or crew health hit 0.
+signal mission_ended(won: bool)

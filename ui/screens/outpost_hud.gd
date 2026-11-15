@@ -17,13 +17,19 @@ const HEALTH_TEXT := {
 	ResourceBar.Status.WARNING: "OK",
 	ResourceBar.Status.CRITICAL: "Low",
 }
-## The learning path from GAME_ARCHITECTURE.md, one new idea per step.
+## Checklist text for OutpostSimulation.GOALS (the sim decides when each is done).
 const TASKS := [
 	{"id": &"greenhouse", "text": "Build a Greenhouse"},
 	{"id": &"rover_blueprint", "text": "Search: Rover Blueprint"},
 	{"id": &"rover", "text": "Build the Rover"},
 	{"id": &"explore", "text": "Explore with the Rover"},
 ]
+const LOSS_TEXT := {
+	"water": "The colony ran out of water. An Ice Drill turns ice into water every day.",
+	"food": "The crew ran out of food. A Greenhouse grows food when it has light, water and power.",
+	"oxygen": "The crew ran out of oxygen. Greenhouse plants make oxygen.",
+	"radiation": "Space radiation was too strong. A Shield protects the crew.",
+}
 const RESOURCES := [&"power", &"water", &"food", &"oxygen"]
 const RESOURCE_NAMES := {&"power": "Energy", &"water": "Water", &"food": "Food", &"oxygen": "Oxygen"}
 const RESOURCE_ICONS := {&"power": "icon_energy", &"water": "icon_water", &"food": "icon_food", &"oxygen": "icon_oxygen"}
@@ -32,7 +38,8 @@ const RESOURCE_ICONS := {&"power": "icon_energy", &"water": "icon_water", &"food
 const INFO := {
 	&"greenhouse": {"name": "Greenhouse", "art": "building_greenhouse", "text": "Grows food and oxygen. Needs light, water and power."},
 	&"shield": {"name": "Shield", "art": "icon_health", "text": "Blocks some radiation to keep the crew healthy. Uses power."},
-	&"rover": {"name": "Rover", "art": "icon_explore", "text": "Drives out to collect science samples."},
+	&"rover": {"name": "Rover", "art": "icon_explore", "text": "Drives out to collect science samples and ice."},
+	&"ice_drill": {"name": "Ice Drill", "art": "icon_water", "text": "Turns buried ice into water every day. Needs lots of power."},
 	&"solar": {"name": "Solar", "art": "building_solar_panel", "text": "Turns sunlight into power. Less sun, less power."},
 	&"water_tank": {"name": "Recycler", "art": "building_water_system", "text": "Gets back part of the water the crew uses. Needs power."},
 	&"habitat": {"name": "Habitat", "art": "building_habitat", "text": "The crew's home. Upgrades need less power every day."},
@@ -42,7 +49,7 @@ const INFO := {
 	&"explore": {"name": "Field Trip", "art": "icon_explore", "text": "The rover drives out and brings back science samples."},
 }
 const MENUS := {
-	&"build": [&"greenhouse", &"shield", &"rover", &"solar", &"water_tank", &"habitat"],
+	&"build": [&"greenhouse", &"ice_drill", &"rover", &"shield", &"solar", &"water_tank", &"habitat"],
 	&"search": [&"rover_blueprint", &"radiation_map", &"emergency"],
 	&"explore": [&"explore"],
 }
@@ -84,6 +91,8 @@ func _ready() -> void:
 	resized.connect(_place_drawers.bind(false))
 	_checklist_drawer.resized.connect(_place_drawers.bind(false))
 	Colony.day_finished.connect(_on_day_finished)
+	Colony.changed.connect(_refresh_goals)
+	Colony.mission_ended.connect(_show_mission_end, CONNECT_DEFERRED)
 
 	_sync(false)
 	_build_checklist()
@@ -159,7 +168,9 @@ func _explain_day(report: Dictionary) -> void:
 	else:
 		var extra := ""
 		if float(report.food_made) > 0.0:
-			extra = " The greenhouse grew %d food." % roundi(report.food_made)
+			extra += " The greenhouse grew %d food." % roundi(report.food_made)
+		if float(report.water_mined) > 0.0:
+			extra += " The drill made %d water." % roundi(report.water_mined)
 		_say(&"success", "Day %d done!" % (int(report.day) - 1), "Solar panels made %d power.%s" % [roundi(report.generated_power), extra])
 
 
@@ -181,7 +192,7 @@ func _open_menu(mode: StringName) -> void:
 		b.custom_minimum_size = Vector2(0, 44)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.theme_type_variation = &"IconButton"
-		b.add_theme_font_size_override(&"font_size", 16)
+		b.add_theme_font_size_override(&"font_size", 15)
 		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		b.pressed.connect(_select.bind(id))
 		%Options.add_child(b)
@@ -257,6 +268,7 @@ func _select(id: StringName) -> void:
 				costs.append("%d %s" % [p.cost[key], RESOURCE_NAMES[key].to_lower()])
 			_row("icon_explore", "Uses " + ", ".join(costs))
 			_row("icon_search", "Finds %d science sample%s" % [p.science, "" if int(p.science) == 1 else "s"])
+			_row("icon_water", "Brings back ice: +%d water" % p.ice)
 			_row("icon_clock", "Takes the rest of the day")
 	_forecast_row(p.forecast)
 
@@ -321,22 +333,80 @@ func _confirm() -> void:
 			result = Colony.build(id)
 			if result.ok:
 				Events.build_confirmed.emit(id)
-				complete_task(id)
 				var level := int(Colony.state.levels[id])
 				_say(&"success", "%s %s!" % [INFO[id].name, "built" if level == 1 else "upgraded to level %d" % level],
 					"It starts working tomorrow. %s" % INFO[id].text)
 		&"search":
 			result = Colony.emergency_supply() if id == &"emergency" else Colony.research(id)
-			if result.ok:
-				complete_task(id)
 		&"explore":
 			result = Colony.explore()
 			if result.ok:
-				complete_task(&"explore")
-				_say(&"success", "Samples found!", "The rover brought back %d science sample%s. Use them in Search." \
-					% [result.science_found, "" if int(result.science_found) == 1 else "s"])
+				_say(&"success", "Samples found!", "The rover brought back %d science sample%s and %d water from ice." \
+					% [result.science_found, "" if int(result.science_found) == 1 else "s", result.ice_found])
 	if not result.ok:
 		_say(&"warning", "Not yet", result.reason)
+
+
+## Ticks off every goal the simulation reports as done.
+func _refresh_goals() -> void:
+	var done := OutpostSimulation.goals_done(Colony.state)
+	for id in done:
+		if done[id]:
+			complete_task(id)
+
+
+## Mission over: a modal card that says what happened and offers a replay.
+func _show_mission_end(result: Dictionary) -> void:
+	_close_menu(false)
+	var won: bool = result.status == &"won"
+	var state: Dictionary = Colony.state
+	var overlay := Control.new()
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.z_index = 6
+	add_child(overlay)
+	var dim := ColorRect.new()
+	dim.color = Color(0.02, 0.03, 0.1, 0.6)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(dim)
+	var card := PanelContainer.new()
+	card.theme_type_variation = &"PopupCard"
+	card.custom_minimum_size = Vector2(440, 0)
+	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
+	card.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	card.grow_vertical = Control.GROW_DIRECTION_BOTH
+	overlay.add_child(card)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override(&"separation", 12)
+	card.add_child(col)
+	var title := Label.new()
+	title.theme_type_variation = &"H1"
+	title.text = "Mission Complete!" if won else "Mission Failed"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(title)
+	var art := TextureRect.new()
+	art.texture = load(ART % ("mascot_celebrate" if won else "mascot_think"))
+	art.custom_minimum_size = Vector2(0, 130)
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	art.material = load("res://ui/theme/sticker.tres")
+	col.add_child(art)
+	var body := Label.new()
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if won:
+		body.text = "Your colony is running! The crew lived %d days with %d%% health." % [int(state.day) - 1, roundi(state.crew_health)]
+	else:
+		body.text = LOSS_TEXT.get(String(result.cause), LOSS_TEXT.radiation)
+	col.add_child(body)
+	var again := Button.new()
+	again.text = "Play Again"
+	again.theme_type_variation = &"PrimaryButton"
+	again.custom_minimum_size = Vector2(0, 64)
+	again.pressed.connect(func() -> void:
+		Colony.reset()
+		get_tree().reload_current_scene())
+	col.add_child(again)
+	again.grab_focus()
 
 
 # --- Drawers ---------------------------------------------------------------

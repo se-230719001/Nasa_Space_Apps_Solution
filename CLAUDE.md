@@ -34,7 +34,8 @@ Rules for `events.gd`:
   a `# TODO(gameplay): emit this when …` next to it). Don't edit gameplay files to emit it.
 
 Current signals: `screen_changed`, `button_pressed`, `build_popup_opened`, `build_cancelled`,
-`build_confirmed`, `resource_changed`, `task_completed`, `mascot_said`, `mascot_typed`.
+`build_confirmed`, `resource_changed`, `task_completed`, `mascot_said`, `mascot_typed`,
+`mission_ended`.
 
 ## Git on a shared branch
 

@@ -20,15 +20,22 @@ const MODULES := {
 	&"solar": {"kit_cost": 0.0, "upgrade_kits": [0.0, 4.0, 6.0], "generation": [24.0, 32.0, 40.0]},
 	&"greenhouse": {"kit_cost": 6.0, "upgrade_kits": [0.0, 4.0, 6.0], "power": [8.0, 10.0, 12.0], "water": [6.0, 7.0, 8.0], "food": [12.0, 17.0, 22.0], "oxygen": [3.0, 4.0, 5.0]},
 	&"water_tank": {"kit_cost": 0.0, "upgrade_kits": [0.0, 4.0, 6.0], "power": [2.0, 3.0, 4.0], "recovery": [0.50, 0.65, 0.80]},
+	## Mines ice into water: the colony's only real water income. Power hungry,
+	## so it competes with the greenhouse on low-sun days.
+	&"ice_drill": {"kit_cost": 6.0, "upgrade_kits": [0.0, 4.0, 6.0], "power": [10.0, 12.0, 14.0], "water": [6.0, 8.0, 10.0]},
 	&"shield": {"kit_cost": 8.0, "upgrade_kits": [0.0, 4.0, 6.0], "power": [3.0, 4.0, 5.0], "protection": [2.0, 4.0, 6.0]},
-	&"rover": {"kit_cost": 8.0, "upgrade_kits": [0.0, 4.0, 6.0], "explore_cost": [{}, {&"power": 8.0, &"water": 3.0, &"oxygen": 2.0}, {&"power": 7.0, &"water": 3.0, &"oxygen": 2.0}, {&"power": 6.0, &"water": 2.0, &"oxygen": 1.0}], "science": [0, 1, 2, 3]},
+	&"rover": {"kit_cost": 8.0, "upgrade_kits": [0.0, 4.0, 6.0], "explore_cost": [{}, {&"power": 8.0, &"water": 3.0, &"oxygen": 2.0}, {&"power": 7.0, &"water": 3.0, &"oxygen": 2.0}, {&"power": 6.0, &"water": 2.0, &"oxygen": 1.0}], "science": [0, 1, 2, 3], "ice": [0.0, 6.0, 7.0, 8.0]},
 }
+
+## Mission goals, in teaching order (one new idea each). The run is won when
+## all are done with the crew alive, and lost when crew health reaches 0.
+const GOALS := [&"greenhouse", &"rover_blueprint", &"rover", &"explore"]
 
 ## Main scene already contains these three structures; state mirrors that world.
 static func new_state() -> Dictionary:
 	return {"stores": START.duplicate(), "kits": START_KITS, "modules": {&"habitat": 1, &"solar": 1, &"water_tank": 1},
 		"levels": {&"habitat": 1, &"solar": 1, &"water_tank": 1}, "crew": CREW_SIZE,
-		"crew_health": 100.0, "science": 1, "unlocks": {&"habitat": true, &"solar": true, &"water_tank": true, &"greenhouse": true},
+		"crew_health": 100.0, "science": 1, "trips": 0, "unlocks": {&"habitat": true, &"solar": true, &"water_tank": true, &"greenhouse": true, &"ice_drill": true},
 		"research_done": {}, "emergency_used": false, "day": 1, "history": []}
 
 
@@ -134,6 +141,9 @@ static func advance_day(state: Dictionary, environment := {}) -> Dictionary:
 		var water_factor := minf(1.0, float(stores.water) / float(g.water[greenhouse_level - 1]))
 		greenhouse_factor = minf(sunlight_factor, water_factor)
 		optional_power_need += float(g.power[greenhouse_level - 1]) * greenhouse_factor
+	var drill_level := int(levels.get(&"ice_drill", 0))
+	if drill_level > 0:
+		optional_power_need += float(MODULES[&"ice_drill"].power[drill_level - 1])
 	var shield_level := int(levels.get(&"shield", 0))
 	if shield_level > 0:
 		optional_power_need += float(MODULES[&"shield"].power[shield_level - 1])
@@ -142,6 +152,12 @@ static func advance_day(state: Dictionary, environment := {}) -> Dictionary:
 	available_power -= optional_power
 	stores.power = minf(float(CAPACITY.power), available_power)
 	spilled = maxf(0.0, available_power - float(CAPACITY.power))
+
+	# Ice drill output scales with the power it actually received.
+	var water_mined := 0.0
+	if drill_level > 0:
+		water_mined = float(MODULES[&"ice_drill"].water[drill_level - 1]) * machine_factor
+		stores.water = minf(CAPACITY.water, float(stores.water) + water_mined)
 
 	# Water recovery only returns a share of water actually used by the crew.
 	if int(state.modules.get(&"water_tank", 0)) > 0:
@@ -181,7 +197,7 @@ static func advance_day(state: Dictionary, environment := {}) -> Dictionary:
 	state.day = int(state.day) + 1
 	var report := {"day": state.day, "generated_power": generated, "spilled_power": spilled,
 		"spilled_food": food_spilled, "spilled_oxygen": oxygen_spilled,
-		"power_support": power_support, "unmet_crew_needs": unmet, "water_recovered": water_recovered,
+		"power_support": power_support, "unmet_crew_needs": unmet, "water_recovered": water_recovered, "water_mined": water_mined,
 		"food_made": food_made, "oxygen_made": oxygen_made, "radiation_after_shield": radiation_after_shield,
 		"health_loss": health_loss, "crew_health": state.crew_health, "stores": stores.duplicate()}
 	state.history.append(report.duplicate())
@@ -199,8 +215,10 @@ static func preview_explore(state: Dictionary, environment := {}) -> Dictionary:
 	var forecast_state: Dictionary = state.duplicate(true)
 	for key in cost:
 		forecast_state.stores[key] -= float(cost[key])
+	var ice := float(MODULES[&"rover"].ice[level])
+	forecast_state.stores.water = minf(CAPACITY.water, float(forecast_state.stores.water) + ice)
 	var forecast := _forecast(forecast_state, environment)
-	return {"allowed": true, "cost": cost, "science": MODULES[&"rover"].science[level], "forecast": forecast}
+	return {"allowed": true, "cost": cost, "science": MODULES[&"rover"].science[level], "ice": ice, "forecast": forecast}
 
 
 static func explore(state: Dictionary, environment := {}) -> Dictionary:
@@ -210,8 +228,10 @@ static func explore(state: Dictionary, environment := {}) -> Dictionary:
 	for key in preview.cost:
 		state.stores[key] -= float(preview.cost[key])
 	state.science += int(preview.science)
+	state.stores.water = minf(CAPACITY.water, float(state.stores.water) + float(preview.ice))
+	state.trips = int(state.get("trips", 0)) + 1
 	var day_report := advance_day(state, environment)
-	return {"ok": true, "state": state, "science_found": preview.science, "day_report": day_report}
+	return {"ok": true, "state": state, "science_found": preview.science, "ice_found": preview.ice, "day_report": day_report}
 
 
 static func preview_research(state: Dictionary, research_id: StringName, environment := {}) -> Dictionary:
@@ -284,6 +304,34 @@ static func _forecast(state: Dictionary, environment := {}) -> Dictionary:
 		"unmet_needs": result.unmet_crew_needs,
 		"greenhouse_food": result.food_made, "greenhouse_oxygen": result.oxygen_made,
 		"water_recovered": result.water_recovered}
+
+
+## Which mission goals are done (id -> bool).
+static func goals_done(state: Dictionary) -> Dictionary:
+	return {
+		&"greenhouse": int(state.modules.get(&"greenhouse", 0)) > 0,
+		&"rover_blueprint": bool(state.research_done.get(&"rover_blueprint", false)),
+		&"rover": int(state.modules.get(&"rover", 0)) > 0,
+		&"explore": int(state.get("trips", 0)) > 0,
+	}
+
+
+## "playing", "won" or "lost", with the main cause when lost.
+static func outcome(state: Dictionary) -> Dictionary:
+	if float(state.crew_health) <= 0.0:
+		var cause := "radiation"
+		if not state.history.is_empty():
+			var last: Dictionary = state.history[-1]
+			var worst := 0.0
+			for key in last.unmet_crew_needs:
+				if float(last.unmet_crew_needs[key]) > worst:
+					worst = float(last.unmet_crew_needs[key])
+					cause = String(key)
+		return {"status": &"lost", "cause": cause}
+	for done in goals_done(state).values():
+		if not done:
+			return {"status": &"playing"}
+	return {"status": &"won"}
 
 
 static func _denied(reason: String) -> Dictionary:

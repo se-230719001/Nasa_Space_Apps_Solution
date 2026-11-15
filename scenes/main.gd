@@ -7,11 +7,13 @@ const LOTS := {
 	&"greenhouse": Vector3(0.5, 0, 3.5),
 	&"shield": Vector3(-5.5, 0, 6.0),
 	&"rover": Vector3(9.0, 0, -8.5),
+	&"ice_drill": Vector3(-11.5, 0, -2.0),
 }
 const SCENES := {
 	&"greenhouse": preload("res://scenes/buildings/greenhouse.gd"),
 	&"shield": preload("res://scenes/buildings/shield_generator.gd"),
 	&"rover": preload("res://scenes/buildings/rover.gd"),
+	&"ice_drill": preload("res://scenes/buildings/ice_drill.gd"),
 }
 
 @onready var _tile: MeshInstance3D = $World/PlacementTile

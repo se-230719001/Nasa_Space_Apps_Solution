@@ -9,6 +9,8 @@ signal changed
 signal day_finished(report: Dictionary, before: Dictionary)
 ## A module was built (level 1) or upgraded (level 2-3).
 signal module_changed(module_id: StringName, level: int)
+## The run is over. `result` is OutpostSimulation.outcome(): status + cause.
+signal mission_ended(result: Dictionary)
 
 ## Local scenario used until a validated NASA bundle is plugged in (see
 ## NasaEnvironmentData). Sunlight is a 0-1 fraction; radiation is game points.
@@ -24,6 +26,13 @@ const SCENARIO := [
 ]
 
 var state := OutpostSimulation.new_state()
+var finished := false
+
+
+## Fresh run (the caller reloads the scene so the world matches).
+func reset() -> void:
+	state = OutpostSimulation.new_state()
+	finished = false
 
 
 ## Today's conditions (the ones the next day-advance will use).
@@ -67,6 +76,7 @@ func build(module_id: StringName) -> Dictionary:
 	if result.ok:
 		module_changed.emit(module_id, int(state.levels[module_id]))
 		changed.emit()
+		_check_outcome()
 	return result
 
 
@@ -89,4 +99,14 @@ func _run_day(action: Callable) -> Dictionary:
 	if result.ok:
 		day_finished.emit(result.day_report, before)
 		changed.emit()
+		_check_outcome()
 	return result
+
+
+func _check_outcome() -> void:
+	var result := OutpostSimulation.outcome(state)
+	if finished or result.status == &"playing":
+		return
+	finished = true
+	mission_ended.emit(result)
+	Events.mission_ended.emit(result.status == &"won")

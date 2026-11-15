@@ -78,12 +78,19 @@ Her modül türünden bu prototipte bir tane bulunur; L1–L3 seviyeleri vardır
 | SolarArray | En çok +24 güç/gün × güneş | +32 × güneş | +40 × güneş | Karanlıkta üretim yine düşer; parça kiti gerekir |
 | Greenhouse | 8 güç + 6 su harcar; en çok +12 gıda, +3 oksijen/gün | 10 güç + 7 su; +17 gıda, +4 oksijen | 12 güç + 8 su; +22 gıda, +5 oksijen | Yüksek seviye daha çok ürün verir, daha çok girdi ister |
 | WaterTank / geri kazanım | Kullanılan ekip suyunun %50'sini geri alır; en çok 2 güç/gün | %65; en çok 3 güç | %80; en çok 4 güç | Daha az net su kaybı için elektrik kullanır |
+| IceDrill | Günde +6 su; en çok 10 güç/gün | +8 su; 12 güç | +10 su; 14 güç | Tek gerçek su kaynağı; az güneşte sera ile güç için yarışır |
 | Shield | 2 radyasyon puanı azaltır; en çok 3 güç/gün | 4 puan; 4 güç | 6 puan; 5 güç | Daha fazla koruma, daha fazla elektrik talebi |
 | Rover | Keşif başına 8 güç, 3 su, 2 oksijen; 1 Science | 7 güç, 3 su, 2 oksijen; 2 Science | 6 güç, 2 su, 1 oksijen; 3 Science | Daha verimli keşif için önceden kit harcanır |
 
-**Kit bedeli:** Sera 6, Shield 8, Rover 8; seviye yükseltme L1→L2 için 4, L2→L3 için 6 kit. Başlangıç kitleri tüm yapıları ve bütün yükseltmeleri aynı anda karşılamaz; oyuncu hedefe göre seçim yapar. Shield'i araştırma ile açınca 8 kitlik bir görev paketi gelir. Kit stoğu 30'u aşmaz; taşan kit ödülü `kit_overflow` olarak raporlanır.
+**Kit bedeli:** Sera 6, IceDrill 6, Shield 8, Rover 8; seviye yükseltme L1→L2 için 4, L2→L3 için 6 kit. Başlangıç kitleri tüm yapıları ve bütün yükseltmeleri aynı anda karşılamaz; oyuncu hedefe göre seçim yapar. Shield'i araştırma ile açınca 8 kitlik bir görev paketi gelir. Kit stoğu 30'u aşmaz; taşan kit ödülü `kit_overflow` olarak raporlanır.
 
 Solar L1/L2/L3 üretimi, güneş ışığı ile çarpılır. Sera gücü ve suyu verilmediğinde tam ürün çıkarması mümkün değildir. WaterTank geri kazanımı yalnızca ekip tarafından gerçekten harcanmış suya uygulanır. Shield ilk seviyede radyasyonu sıfırlamaz. Bu kurallar modül açıklamasıyla simülasyonun aynı şeyi söylemesini sağlar.
+
+## Görev sonu: kazanma ve kaybetme
+
+- **Kaybetme:** Ekip sağlığı 0'a inerse görev biter. Kart, son günün en büyük açığını (su, gıda, oksijen) ya da radyasyonu neden olarak gösterir ve çözüm yolunu adlandırır.
+- **Kazanma (Faz 0 görevi):** `OutpostSimulation.GOALS` sırasıyla tamamlanınca: Sera kur → Rover planını araştır → Rover kur → ilk keşif. Ekip hayatta olmalıdır.
+- Hedef ve sonuç hesabı simülasyondadır (`goals_done`, `outcome`); HUD yalnızca gösterir. Faz 1'de her bölüm kendi hedef ve senaryosunu veri olarak taşıyacak.
 
 ## Search ve Explore — bağlı görev döngüsü
 
@@ -95,7 +102,7 @@ Rover ile Explore tamamlanınca her gezi 1–3 Science sample verir. Bir sample 
 
 ### Explore
 
-Explore, Rover varsa bir saha gezisi başlatır. Onaydan önce o seviye için gereken güç, su ve oksijen ile beklenen Science ödülü görünür. Onayda bu kaynaklar anında düşer ve o görev günü ilerler. NASA/yerel senaryo koşulları o günün güneşlenmesini ve radyasyon puanını belirler. Geri dönülen bulgu Search ağacında kullanılabilir.
+Explore, Rover varsa bir saha gezisi başlatır. Onaydan önce o seviye için gereken güç, su ve oksijen ile beklenen Science ödülü görünür. Rover dönüşte buz da getirir (L1/L2/L3: +6/+7/+8 su); keşif böylece hayatta kalmaya da katkı verir. Onayda bu kaynaklar anında düşer ve o görev günü ilerler. NASA/yerel senaryo koşulları o günün güneşlenmesini ve radyasyon puanını belirler. Geri dönülen bulgu Search ağacında kullanılabilir.
 
 ### Ortak döngü
 
@@ -125,6 +132,8 @@ Her senaryo veri kartı sağlayıcı, dataset adı/kimliği, sürüm, zaman aral
 Kod ve doküman aynı kabul kurallarını paylaşır:
 
 - Başlangıçtaki kurulu modüller sahnedeki Habitat, SolarArray, WaterTank ile aynı.
+- IceDrill aldığı güç oranında su üretir; güç yoksa su da yoktur.
+- Ekip sağlığı 0 olunca `outcome` "lost", bütün hedefler tamamlanınca "won" döner.
 - Kaynaklar 0–100, kit 0–30, sağlık 0–100 aralığında kalır; negatif stok oluşmaz.
 - İki kişi her gün su, gıda ve oksijen tüketir; mevcut miktar ihtiyaca yetmiyorsa açık raporlanır.
 - Güneş 0 ise solar enerji 0; güneş 0.5 ise L1 en çok 12; güneş 1 ise en çok 24 üretir.
