@@ -48,6 +48,12 @@ var _pressed := false
 
 
 func _ready() -> void:
+	if OS.has_feature("mobile"):
+		# On iPad (A16) the 3D target is ~5400 px wide: 8 FPS at full size. Drawn
+		# 2500 px wide and upscaled with FSR: ~36 FPS in game, measured on device.
+		var vp := get_viewport()
+		vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR
+		vp.scaling_3d_scale = clampf(2500.0 / vp.get_texture().get_size().x, 0.2, 1.0)
 	# Modules that start in the scene, so upgrades can react on them too.
 	_spawned = {&"habitat": $World/HabitatBase, &"solar": $World/SolarArray, &"water_tank": $World/WaterTank}
 	_tile.hide()  # the grid replaces the old single placement tile

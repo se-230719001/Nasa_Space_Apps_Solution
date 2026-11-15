@@ -1,4 +1,5 @@
 shader_type sky;
+render_mode use_quarter_res_pass;
 // Airless lunar sky: near-black space, a faint Milky Way band with dust lanes,
 // and stars with a realistic brightness distribution and colour temperatures.
 
@@ -49,18 +50,22 @@ vec3 star_layer(vec3 dir, float cells, float density) {
 
 void sky() {
 	vec3 dir = EYEDIR;
-	vec3 col = space_color;
-
-	// Milky Way: soft band around a great circle, broken by dust lanes.
 	float band = 1.0 - abs(dot(dir, normalize(milky_way_pole)));
 	band = pow(band, 6.0);
-	float clouds = fbm(dir * 4.0);
-	float dust = smoothstep(0.45, 0.7, fbm(dir * 9.0 + 3.0));
-	col += milky_way_color * band * (0.35 + 0.65 * clouds) * (1.0 - 0.7 * dust) * 0.55;
+	// Milky Way: soft band broken by dust lanes. The noise is costly and blurry
+	// anyway, so it runs in the quarter-resolution pass; stars stay sharp.
+	vec3 col;
+	if (AT_QUARTER_RES_PASS) {
+		float clouds = fbm(dir * 4.0);
+		float dust = smoothstep(0.45, 0.7, fbm(dir * 9.0 + 3.0));
+		col = space_color + milky_way_color * band * (0.35 + 0.65 * clouds) * (1.0 - 0.7 * dust) * 0.55;
+	} else {
+		col = QUARTER_RES_COLOR.rgb;
 
-	// Two star layers; extra faint stars inside the Milky Way band.
-	col += star_layer(dir, 180.0, star_density);
-	col += star_layer(dir, 420.0, star_density * (0.6 + 2.5 * band)) * 0.7;
+		// Two star layers; extra faint stars inside the Milky Way band.
+		col += star_layer(dir, 180.0, star_density);
+		col += star_layer(dir, 420.0, star_density * (0.6 + 2.5 * band)) * 0.7;
+	}
 
 	COLOR = col;
 }
