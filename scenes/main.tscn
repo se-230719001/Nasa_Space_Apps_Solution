@@ -1,0 +1,126 @@
+[gd_scene format=3 uid="uid://y7yq2jmgx2v2"]
+
+[ext_resource type="Shader" uid="uid://cqyr0di66pal4" path="res://scenes/environment/earth.gdshader" id="earth_shader"]
+[ext_resource type="Texture2D" uid="uid://g1nv404ch303" path="res://assets/textures/earth_blue_marble_2048.jpg" id="earth_tex"]
+[ext_resource type="Shader" uid="uid://bigco2ushvd2n" path="res://scenes/environment/placement_grid.gdshader" id="grid_shader"]
+[ext_resource type="Shader" uid="uid://tird3o4ciq5f" path="res://scenes/environment/lunar_ground.gdshader" id="ground_shader"]
+[ext_resource type="Script" uid="uid://cqy3qn1oec0ud" path="res://scenes/buildings/habitat_base.gd" id="habitat"]
+[ext_resource type="PackedScene" path="res://ui/screens/outpost_hud.tscn" id="hud"]
+[ext_resource type="Script" uid="uid://b67fyxwvuj56q" path="res://scenes/main.gd" id="main"]
+[ext_resource type="Script" uid="uid://bg2gtbr7bnp3n" path="res://scenes/environment/rock_field.gd" id="rock_field"]
+[ext_resource type="Shader" uid="uid://dg40rpv188c5u" path="res://scenes/environment/space_sky.gdshader" id="sky_shader"]
+[ext_resource type="Script" uid="uid://bjfc2gj7ooc3x" path="res://scenes/buildings/solar_array.gd" id="solar"]
+[ext_resource type="Script" uid="uid://dyj8iixsxvx7f" path="res://scenes/buildings/water_tank.gd" id="water"]
+
+[sub_resource type="ShaderMaterial" id="sky_mat"]
+shader = ExtResource("sky_shader")
+shader_parameter/space_color = Color(0.006, 0.008, 0.02, 1)
+shader_parameter/milky_way_color = Color(0.32, 0.3, 0.42, 1)
+shader_parameter/milky_way_pole = Vector3(0.35, 0.55, 0.76)
+shader_parameter/star_density = 0.022
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+radiance_size = 1
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 2
+ambient_light_color = Color(0.5, 0.55, 0.8, 1)
+ambient_light_energy = 0.42
+tonemap_mode = 3
+tonemap_white = 6.0
+glow_enabled = true
+glow_intensity = 0.5
+glow_bloom = 0.05
+glow_hdr_threshold = 1.2
+
+[sub_resource type="ShaderMaterial" id="earth_mat"]
+render_priority = 0
+shader = ExtResource("earth_shader")
+shader_parameter/day_texture = ExtResource("earth_tex")
+shader_parameter/sun_direction = Vector3(-0.2795, 0.11, 0.9538)
+shader_parameter/atmosphere_color = Color(0.35, 0.6, 1, 1)
+shader_parameter/rotation = 0.35
+
+[sub_resource type="SphereMesh" id="earth"]
+material = SubResource("earth_mat")
+radial_segments = 96
+rings = 48
+
+[sub_resource type="ShaderMaterial" id="ground_mat"]
+render_priority = 0
+shader = ExtResource("ground_shader")
+shader_parameter/regolith_dark = Color(0.34, 0.34, 0.37, 1)
+shader_parameter/regolith_light = Color(0.56, 0.56, 0.59, 1)
+shader_parameter/highland_tint = Color(0.62, 0.61, 0.62, 1)
+shader_parameter/pad_center = Vector3(0, 0, 0)
+shader_parameter/pad_radius = 9.0
+shader_parameter/relief = 1.0
+
+[sub_resource type="PlaneMesh" id="ground"]
+material = SubResource("ground_mat")
+size = Vector2(2000, 2000)
+
+[sub_resource type="ShaderMaterial" id="grid_mat"]
+render_priority = 1
+shader = ExtResource("grid_shader")
+shader_parameter/color = Color(0.235, 0.86, 0.34, 1)
+shader_parameter/cells = 3.0
+
+[sub_resource type="PlaneMesh" id="tile"]
+material = SubResource("grid_mat")
+size = Vector2(4.2, 4.2)
+
+[node name="Main" type="Node3D" unique_id=1167444657]
+script = ExtResource("main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2017112678]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=875486518]
+transform = Transform3D(0.464, 0.3969, -0.792, 0, 0.894, 0.448, 0.8858, -0.2079, 0.4148, 0, 20, 0)
+light_color = Color(1, 0.97, 0.92, 1)
+light_energy = 1.5
+shadow_enabled = true
+directional_shadow_max_distance = 80.0
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=619336628]
+transform = Transform3D(0.76657677, -0.35543084, 0.53481686, 0.028401047, 0.8508008, 0.5247203, -0.64152443, -0.38704902, 0.6622987, 21.646656, 22.31669, 23.22622)
+fov = 44.0
+far = 3000.0
+
+[node name="Earth" type="MeshInstance3D" parent="." unique_id=1855656865]
+transform = Transform3D(42.4429, 0, 0, 0, 42.4429, 0, 0, 0, 42.4429, -408.5039, 51.6527, -781.2224)
+cast_shadow = 0
+mesh = SubResource("earth")
+
+[node name="World" type="Node3D" parent="." unique_id=483009130]
+
+[node name="Ground" type="MeshInstance3D" parent="World" unique_id=1650699303]
+mesh = SubResource("ground")
+
+[node name="Rocks" type="Node3D" parent="World" unique_id=844795230]
+script = ExtResource("rock_field")
+
+[node name="HabitatBase" type="Node3D" parent="World" unique_id=1488303893]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, -3.5)
+script = ExtResource("habitat")
+
+[node name="SolarArray" type="Node3D" parent="World" unique_id=1630883697]
+transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, 5.5, 0, -4.5)
+script = ExtResource("solar")
+
+[node name="WaterTank" type="Node3D" parent="World" unique_id=713608171]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 1.5)
+script = ExtResource("water")
+
+[node name="PlacementTile" type="MeshInstance3D" parent="World" unique_id=1309374935]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.04, 3.5)
+cast_shadow = 0
+mesh = SubResource("tile")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1474336988]
+
+[node name="OutpostHUD" parent="UI" unique_id=1271712847 instance=ExtResource("hud")]

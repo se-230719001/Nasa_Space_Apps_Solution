@@ -1,0 +1,49 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://ui/components/time_display.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/icons/clock.svg" id="2"]
+
+[sub_resource type="StyleBoxFlat" id="glass"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 18.0
+content_margin_bottom = 6.0
+bg_color = Color(0.102, 0.1216, 0.2824, 0.78)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.2471, 0.2941, 0.6706, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+anti_aliasing = true
+
+[node name="TimeDisplay" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 56)
+theme_override_styles/panel = SubResource("glass")
+script = ExtResource("1")
+
+[node name="Row" type="HBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Icon" type="TextureRect" parent="Row"]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("2")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TimeLabel" type="Label" parent="Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 0)
+layout_mode = 2
+theme_type_variation = &"DayNumber"
+theme_override_font_sizes/font_size = 30
+text = "00:00"
+vertical_alignment = 1
